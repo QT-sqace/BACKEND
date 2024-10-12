@@ -18,9 +18,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("inside CustomOAuth2UserService=======================================loadUser");
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("OAuth2User: {}", oAuth2User.getAttributes());
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        log.info("registrationId: {}", registrationId);
         OAuth2Response oAuth2Response = null;
 
         if (registrationId.equals("google")) {
