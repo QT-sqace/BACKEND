@@ -16,19 +16,31 @@ public class KakaoResponse implements OAuth2Response {
 
     @Override
     public String getProviderId() {
-        return "";
+        return (String) attribute.get("sub");
     }
 
+    /**
+     * 현재 카카오 앱 인증을 받지 않아서 이메일을 받아올 수 없음
+     * @return 카카오 이메일
+     */
     @Override
     public String getEmail() {
         return "";
     }
 
+    /**
+     * 현재 카카오 앱 인증을 받지 않아서 실명을 받아올 수 없음
+     * @return 카카오 유저 실명
+     */
     @Override
     public String getName() {
         return "";
     }
 
+
+    /**
+     * @return 카카오 프로필 닉네임
+     */
     public String getNickName(){
         return attribute.get("profile_nickname").toString();
     }

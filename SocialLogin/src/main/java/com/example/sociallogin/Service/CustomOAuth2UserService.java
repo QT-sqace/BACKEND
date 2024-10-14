@@ -13,6 +13,12 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private static final Logger log = LoggerFactory.getLogger(CustomOAuth2UserService.class);
 
+    /**
+     * @param userRequest the user request 유저의 인증 요청
+     * @return 소셜 로그인 제공자의 응답 정보
+     * @throws OAuth2AuthenticationException
+     *
+     */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
@@ -28,6 +34,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "kakao" -> oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
             case "jira" -> oAuth2Response = new JiraResponse(oAuth2User.getAttributes());
         }
+
+        //유저 롤은 임의로 설정함 추후 변경 가능
         String role = "ROLE_USER";
         return new CustomOAuth2User(oAuth2Response, role);
     }

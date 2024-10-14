@@ -11,10 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashMap;
 import java.util.Optional;
-
+/**
+ * 아래 uri들은 각 소셜 로그인 제공자의 로그인 성공시 리다이렉트 되는 uri
+ * 유저 정보를 제대로 받아오는지 테스트를 위한 컨트롤러로 실제 서비스에서는 사용하지 않음
+ * */
 @Controller
 public class SocialLoginController {
     private static final Logger log = LoggerFactory.getLogger(SocialLoginController.class);
+
     @GetMapping("/google")
     public String GooglePage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -31,6 +35,7 @@ public class SocialLoginController {
     public String KakaoPage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         OAuth2User kakao_user_info = (OAuth2User) authentication.getPrincipal();
+        log.info(kakao_user_info.getAttributes().toString());
         log.info("LoginResponse: {}", kakao_user_info);
         log.info("nonce: {}", Optional.ofNullable(kakao_user_info.getAttribute("nonce")));
         model.addAllAttributes(new HashMap<>() {{
