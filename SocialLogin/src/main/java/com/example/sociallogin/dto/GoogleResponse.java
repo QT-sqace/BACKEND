@@ -20,11 +20,17 @@ public class GoogleResponse implements OAuth2Response{
         return attribute.get("sub").toString();
     }
 
+    /**
+     * @return 구글 이메일
+     */
     @Override
     public String getEmail() {
         return attribute.get("email").toString();
     }
 
+    /**
+     * @return 구글 유저 실명
+     */
     @Override
     public String getName() {
         return attribute.get("name").toString();
