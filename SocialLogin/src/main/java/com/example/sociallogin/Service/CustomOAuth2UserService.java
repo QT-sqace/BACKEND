@@ -1,9 +1,6 @@
 package com.example.sociallogin.Service;
 
-import com.example.sociallogin.dto.CustomOAuth2User;
-import com.example.sociallogin.dto.GoogleResponse;
-import com.example.sociallogin.dto.KakaoResponse;
-import com.example.sociallogin.dto.OAuth2Response;
+import com.example.sociallogin.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -18,17 +15,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("inside CustomOAuth2UserService=======================================loadUser");
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        log.info(userRequest.toString());
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("OAuth2User: {}", oAuth2User.getAttributes());
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        oAuth2User.getAttributes().forEach((k, v) -> log.info("key: {}, value: {}", k, v));
         log.info("registrationId: {}", registrationId);
         OAuth2Response oAuth2Response = null;
 
-        if (registrationId.equals("google")) {
-            oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        } else if (registrationId.equals("kakao")) {
-            oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
+        switch (registrationId) {
+            case "google" -> oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            case "kakao" -> oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
+            case "jira" -> oAuth2Response = new JiraResponse(oAuth2User.getAttributes());
         }
         String role = "ROLE_USER";
         return new CustomOAuth2User(oAuth2Response, role);

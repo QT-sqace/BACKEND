@@ -11,7 +11,6 @@ public class SocialLoginApplication {
     private static final Logger log = LoggerFactory.getLogger(SocialLoginApplication.class);
 
     public static void main(String[] args) {
-        log.info("=============================");
         SpringApplication.run(SocialLoginApplication.class, args);
     }
 
