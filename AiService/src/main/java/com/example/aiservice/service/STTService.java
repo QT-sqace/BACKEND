@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 
 @Service
 public class STTService {
-    @Value("${STTservice-endopint-uri")
+    @Value("${STTservice-endpoint-uri}")
     private String STTserviceEndpointUri;
 
     public String stt(File file) throws URISyntaxException {
