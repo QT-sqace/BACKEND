@@ -15,9 +15,9 @@ import java.util.Optional;
  * 아래 uri들은 각 소셜 로그인 제공자의 로그인 성공시 리다이렉트 되는 uri
  * 유저 정보를 제대로 받아오는지 테스트를 위한 컨트롤러로 실제 서비스에서는 사용하지 않음
  * */
-@Controller
-public class SocialLoginController {
-    private static final Logger log = LoggerFactory.getLogger(SocialLoginController.class);
+//@Controller
+public class SocialLoginController3 {
+    private static final Logger log = LoggerFactory.getLogger(SocialLoginController3.class);
 
     @GetMapping("/google")
     public String GooglePage(Model model) {
