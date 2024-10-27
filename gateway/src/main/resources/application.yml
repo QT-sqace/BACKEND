@@ -1,0 +1,58 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: sociallogin
+          uri: lb://SOCIALLOGIN
+          predicates:
+            - Path=/sociallogin/**
+          filters:
+            - RewritePath=/sociallogin/(?<segment>.*), /$\{segment}
+        - id: kakao_login_route
+          uri: http://localhost:8080 # 백엔드의 주소
+          predicates:
+            - Path=/login/oauth2/code/kakao
+          filters:
+            - RewritePath=/login/oauth2/code/kakao, /oauth2/authorization/kakao
+
+        - id: oauth2_redirect
+          uri: http://localhost:8080
+          predicates:
+            - Path=/login/oauth2/code/**
+          filters:
+            - RewritePath=/login/oauth2/code/(?<segment>.*), /login/oauth2/code/$\{segment}
+        - id: aiservice
+          uri: lb://AISERVICE
+          predicates:
+            - Path=/aiservice/**
+          filters:
+            - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
+
+      # Global CORS 설정
+      globalcors:
+        corsConfigurations:
+          '[/**]':  # 모든 경로에 대해 CORS 설정 적용
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowCredentials: true  # 인증 정보 포함
+logging:
+  level:
+    org.springframework: DEBUG
