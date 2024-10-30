@@ -14,32 +14,18 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: sociallogin
-          uri: lb://SOCIALLOGIN
-          predicates:
-            - Path=/sociallogin/**
-          filters:
-            - RewritePath=/sociallogin/(?<segment>.*), /$\{segment}
-        - id: kakao_login_route
-          uri: http://localhost:8080 # 백엔드의 주소
-          predicates:
-            - Path=/login/oauth2/code/kakao
-          filters:
-            - RewritePath=/login/oauth2/code/kakao, /oauth2/authorization/kakao
-
-        - id: oauth2_redirect
-          uri: http://localhost:8080
-          predicates:
-            - Path=/login/oauth2/code/**
-          filters:
-            - RewritePath=/login/oauth2/code/(?<segment>.*), /login/oauth2/code/$\{segment}
         - id: aiservice
           uri: lb://AISERVICE
           predicates:
             - Path=/aiservice/**
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
-
+        - id: userservice
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userservice/**
+          filters:
+            - RewritePath=/userservice/(?<segment>.*), /$\{segment}
       # Global CORS 설정
       globalcors:
         corsConfigurations:
@@ -56,3 +42,5 @@ spring:
 logging:
   level:
     org.springframework: DEBUG
+
+secret-key: "ThisStatementIsJwtSecretKeyDoNotUseThisStatement"
