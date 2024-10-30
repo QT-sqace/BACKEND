@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Primary
@@ -66,7 +67,7 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
             userEntity = new User(providerId, email, "google");
             log.info("google에서 가져오는값 정리 이메일: " + email + " id: " + providerId);
         }
-
+/*
 // 사용자 정보를 DB에 저장하는 부분
         try {
             // 이메일이 이미 존재하는지 확인
@@ -77,7 +78,39 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
             }
         } catch (Exception e) {
             log.error("Error saving user to database: " + e.getMessage());
+        }*/
+
+        // 사용자 정보를 DB에 저장하는 부분
+        try {
+            // 이메일이 이미 존재하는지 확인
+            Optional<User> existingUser = Optional.ofNullable(userRepository.findByEmail(userEntity.getEmail()));
+
+            if (existingUser.isPresent()) {
+                User user = existingUser.get();
+
+                // 이메일로 가입된 사용자이고, 소셜 로그인 제공자가 다르면 충돌 처리
+                if ("email".equals(user.getProvider())) {
+                    log.warn("이메일 " + userEntity.getEmail() + "로 이미 이메일 가입된 사용자입니다. 이메일 로그인 요청.");
+                    throw new IllegalArgumentException("이 이메일은 이미 등록되어 있습니다. 이메일과 비밀번호로 로그인해 주세요.");
+                } else {
+                    // 소셜 로그인 제공자가 다르면 경고
+                    if (!user.getProvider().equals(userEntity.getProvider())) {
+                        log.warn("이메일 " + userEntity.getEmail() + "로 이미 " + user.getProvider() + "로 가입된 사용자입니다. " + userEntity.getProvider() + "로 로그인하려면 다른 이메일을 사용해 주세요.");
+                        throw new IllegalArgumentException("이 이메일은 이미 " + user.getProvider() + "로 등록되어 있습니다. " + userEntity.getProvider() + "로 로그인하려면 다른 이메일을 사용해 주세요.");
+                    } else {
+                        // 같은 소셜 로그인 제공자일 경우 소셜 로그인 진행
+                        log.info("이메일 " + userEntity.getEmail() + "로 소셜 로그인 성공.");
+                    }
+                }
+            } else {
+                // 이메일이 존재하지 않으면 새로운 소셜 로그인 사용자 저장
+                userRepository.save(userEntity);
+                log.info("이메일 " + userEntity.getEmail() + "로 새로운 소셜 로그인 사용자 저장.");
+            }
+        } catch (Exception e) {
+            log.error("사용자를 데이터베이스에 저장하는 중 오류 발생: " + e.getMessage());
         }
+
 
         //여기 수정
         return new CustomOAuth2User(providerId, attributes);
