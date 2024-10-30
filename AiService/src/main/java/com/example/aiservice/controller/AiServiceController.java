@@ -18,7 +18,7 @@ public class AiServiceController {
         this.STTService = STTService;
     }
 
-    @PostMapping("/stt")
+    @PostMapping("/user/stt")
     public String index(@RequestParam("file") MultipartFile multipartFile) throws URISyntaxException, IOException {
         // MultipartFile을 File로 변환
         File file = convertToFile(multipartFile);
