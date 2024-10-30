@@ -18,7 +18,8 @@ public class SignInResponseDto extends ResponseDto {
     private SignInResponseDto(String accessToken) {
         super();
         this.accessToken = accessToken;
-        this.expirationTime = 3600;
+        //초단위 60초 * 60분 * 12 시간
+        this.expirationTime = 43200;
     }
 
     //성공시

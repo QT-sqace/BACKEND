@@ -138,9 +138,11 @@ public class AuthServiceImplement implements AuthService {
 
             //토큰 생성하기
             Long userId = userEntity.getUserId();
-            //나중에 로그인후 토큰 오류나면 여기 확인하기
-            token = jwtProvider.create(String.valueOf(userId));
+            String provider = "email";
 
+            //나중에 로그인후 토큰 오류나면 여기 확인하기
+//            token = jwtProvider.create(String.valueOf(userId));
+            token = jwtProvider.create(String.valueOf(userId), provider);
 
         } catch (Exception exception) {
             exception.printStackTrace();

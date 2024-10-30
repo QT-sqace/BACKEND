@@ -23,7 +23,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+/*
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -49,10 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
             //토큰 검사 끝난후 userId값 가져오기
+
+            //소셜 로그인은 userId 말고 providerId로 검증이 되게 수정해야함
             User user = userRepository.findByUserId(Long.valueOf(userId));
             String role = user.getRole();   //role : ROLE_USER
 
             log.info(role);
+
 
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(role));
@@ -83,5 +88,77 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authorization.substring(7);
         return token;
+    }
+}
+*/
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        try {
+            String token = parseBearerToken(request);
+            if (token == null)  {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            Map<String, Object> claims = jwtProvider.validate(token);
+            if (claims == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String id = (String) claims.get("sub");
+            String provider = (String) claims.get("provider");
+
+            User user;
+            if ("email".equals(provider)) {
+                user = userRepository.findByUserId(Long.valueOf(id));
+            } else {
+                user = userRepository.findByProviderId(id);
+            }
+
+            if (user == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String role = user.getRole();
+            log.info("User role: " + role);
+
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority(role));
+
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            AbstractAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(id, null, authorities);
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            securityContext.setAuthentication(authenticationToken);
+            SecurityContextHolder.setContext(securityContext);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private String parseBearerToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+
+        if (!StringUtils.hasText(authorization) || !authorization.startsWith("Bearer ")) {
+            return null;
+        }
+
+        return authorization.substring(7);
     }
 }

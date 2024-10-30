@@ -1,6 +1,7 @@
 package com.example.user_service.config;
 
 import com.example.user_service.filter.JwtAuthenticationFilter;
+import com.example.user_service.handler.OAuth2SuccessHandler;
 import com.example.user_service.service.implement.OAuth2UserServiceImplement;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,8 @@ import java.io.IOException;
 public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final DefaultOAuth2UserService oAuth2UserService;
+    private final OAuth2UserServiceImplement oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean   //필터 설정
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
@@ -47,19 +49,22 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(request-> request
-                        .requestMatchers("/", "/login/**").permitAll()
+                        .requestMatchers("/", "/oauth/**", "/auth/**").permitAll()
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()  //나머지는 모든 인증이 필요
+                        .anyRequest().authenticated()  //나머지는 모든 인증이 필요
                 )
                 //소셜 로그인 부분
                 .oauth2Login(oauth2 -> oauth2
-                        .redirectionEndpoint(endpoint-> endpoint.baseUri("/oauth2/callback/*"))
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/auth"))
+                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/oauth2/callback/*"))
                         .userInfoEndpoint(endpoint-> endpoint.userService(oAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
                 )
                 //인증 실패시 아래 만든 예외응답 사용
                 .exceptionHandling(exceptionHandling-> exceptionHandling
-                        .authenticationEntryPoint(new FailedAuthenticationEntryPoint()))
+                        .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
+                )
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
                 return httpSecurity.build();
