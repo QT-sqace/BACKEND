@@ -56,7 +56,7 @@ public class WebSecurityConfig {
                 )
                 //소셜 로그인 부분
                 .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/auth"))
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/auth/social"))
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/oauth2/callback/*"))
                         .userInfoEndpoint(endpoint-> endpoint.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
