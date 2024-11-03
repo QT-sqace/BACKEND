@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/*
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -39,25 +38,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
+            //jwt 토큰을 Authorization 헤더에서 추출
             String token = parseBearerToken(request);
-            if (token == null)  {   //토큰 없으면 그냥 dofilter하고 return
+            if (token == null)  {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String userId = jwtProvider.validate(token);
-            if (userId == null) {   //userId까지 최종 검사
+            //jwt 토큰 검증 및 클레임 추출
+            Map<String, Object> claims = jwtProvider.validate(token);
+            if (claims == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            //토큰 검사 끝난후 userId값 가져오기
 
-            //소셜 로그인은 userId 말고 providerId로 검증이 되게 수정해야함
+            //클레임에서 userId 와 provider 정보 추출
+            String userId = (String) claims.get("sub");
+            //이제는 필요없음 userId로 통일함
+//            String provider = (String) claims.get("provider");
+
+            //가입 방식에 따라 다르게 정보 확인
             User user = userRepository.findByUserId(Long.valueOf(userId));
-            String role = user.getRole();   //role : ROLE_USER
 
-            log.info(role);
+            if (user == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
+            //사용자 권한 확인
+            String role = user.getRole();
+            log.info("User role: " + role);
 
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(role));
@@ -67,6 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(userId, null, authorities);
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
+            //보안 컨텍스트에 인증정보 설정
             securityContext.setAuthentication(authenticationToken);
             SecurityContextHolder.setContext(securityContext);
 
@@ -74,84 +85,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             exception.printStackTrace();
         }
 
+        //다음 필터로 진행
         filterChain.doFilter(request, response);
     }
 
-    private String parseBearerToken(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-
-        boolean hasAuthorization = StringUtils.hasText(authorization);
-        if (!hasAuthorization) return null; //Authorization 값이 없으면 Null 반환
-
-        boolean isBearer = authorization.startsWith("Bearer ");
-        if (!isBearer) return null; //Bearer 인증인지 검사
-
-        String token = authorization.substring(7);
-        return token;
-    }
-}
-*/
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private final JwtProvider jwtProvider;
-    private final UserRepository userRepository;
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
-        try {
-            String token = parseBearerToken(request);
-            if (token == null)  {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            Map<String, Object> claims = jwtProvider.validate(token);
-            if (claims == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            String id = (String) claims.get("sub");
-            String provider = (String) claims.get("provider");
-
-            User user;
-            if ("email".equals(provider)) {
-                user = userRepository.findByUserId(Long.valueOf(id));
-            } else {
-                user = userRepository.findByProviderId(id);
-            }
-
-            if (user == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            String role = user.getRole();
-            log.info("User role: " + role);
-
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(role));
-
-            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-            AbstractAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(id, null, authorities);
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            securityContext.setAuthentication(authenticationToken);
-            SecurityContextHolder.setContext(securityContext);
-
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
-        filterChain.doFilter(request, response);
-    }
-
+    //토큰 값을 추출
     private String parseBearerToken(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Certification {
 
+    //이메일 검증용 엔티티
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long certificationId;

@@ -26,6 +26,8 @@ public class AuthController {
 
     private final AuthService authService;
 
+    //requestbody로 프론트가 보낸 json 데이터 dto 객체로 매핑
+    //valid 어노테이션은 dto 에서 정의한 유효성 검사 조건 확인
     //인증 메일 보내기
     @PostMapping("/auth/email-certification")
     public ResponseEntity<? super EmailCertificationResponseDto> emailCertification(
@@ -59,6 +61,7 @@ public class AuthController {
         return response;
     }
 
+    //임시 jwt 확인용
     @GetMapping("/user/check")
     public ResponseEntity<ResponseDto> check() {
         // 인증된 사용자 정보 확인

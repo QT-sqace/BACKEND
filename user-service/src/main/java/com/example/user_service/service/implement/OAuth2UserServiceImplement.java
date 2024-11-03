@@ -2,6 +2,8 @@ package com.example.user_service.service.implement;
 
 import com.example.user_service.entity.CustomOAuth2User;
 import com.example.user_service.entity.User;
+import com.example.user_service.entity.UserInfo;
+import com.example.user_service.repository.UserInfoRepository;
 import com.example.user_service.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,9 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,95 +28,74 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
 
 
     private final UserRepository userRepository;
+    private final UserInfoRepository userInfoRepository;
 
     //이걸 webSecurity에 등록
+    @Transactional
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
 
-        log.info("loadUser 호출되었음11111111111111111111111111111111111111");
         String oauthClientName = request.getClientRegistration().getClientName();
-        log.info("OAuth 클라이언트 이름: "+oauthClientName);
-
-        //여기서 유저 정보 가져옴
         OAuth2User oAuth2User = super.loadUser(request);
-        log.info(oAuth2User.getName());
 
-        try {
-            System.out.println(new ObjectMapper().writeValueAsString(oAuth2User.getAttributes()));
-            log.info(new ObjectMapper().writeValueAsString(oAuth2User.getName()));
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
-        User userEntity = null;
         String providerId = null;
         String email = null;
-        Map<String, Object> attributes = null;
+        String nickname = null;
+        String provider = null;
+        Long userId = null;
+//        Map<String, Object> attributes = null;
+        Map<String, Object> attributes = oAuth2User.getAttributes();    //가져오는 정보
+        log.info("가져오는 값 확인: "+attributes.toString());
 
+        //카카오
         if (oauthClientName.equals("kakao")) {
-            providerId = String.valueOf(oAuth2User.getAttributes().get("id"));
-            //여기 수정
-            attributes = oAuth2User.getAttributes();
             Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+
+            providerId = String.valueOf(oAuth2User.getAttributes().get("id"));
+            provider = "kakao";
             email = (String) kakaoAccount.get("email");
-            userEntity = new User(providerId, email, "kakao");
-            log.info("Kakao에서 가져오는값 정리 이메일: "+email + " id: " + providerId);
+            nickname = (String) profile.get("nickname");
+            log.info("Kakao에서 가져오는값 정리 이메일: "+email + " id: " + providerId + " 닉네임: " + nickname);
         }
 
+        //구글
         if (oauthClientName.equals("Google")) {
             providerId = String.valueOf(oAuth2User.getAttributes().get("sub"));
             //여기 수정
-            attributes = oAuth2User.getAttributes();
             email = (String) oAuth2User.getAttributes().get("email");
-            userEntity = new User(providerId, email, "google");
+            nickname = (String) oAuth2User.getAttributes().get("name");
+            provider = "google";
             log.info("google에서 가져오는값 정리 이메일: " + email + " id: " + providerId);
         }
-/*
-// 사용자 정보를 DB에 저장하는 부분
+        //사용자 정보 저장 및 업데이트
+        Optional<User> existingUserOpt = Optional.ofNullable(userRepository.findByEmail(email));
+        User userEntity;
+
         try {
-            // 이메일이 이미 존재하는지 확인
-            if (!userRepository.existsByEmail(userEntity.getEmail())) {
-                userRepository.save(userEntity);
-            } else {
-                log.warn("User with email " + userEntity.getEmail() + " already exists. Skipping save.");
-            }
-        } catch (Exception e) {
-            log.error("Error saving user to database: " + e.getMessage());
-        }*/
-
-        // 사용자 정보를 DB에 저장하는 부분
-        try {
-            // 이메일이 이미 존재하는지 확인
-            Optional<User> existingUser = Optional.ofNullable(userRepository.findByEmail(userEntity.getEmail()));
-
-            if (existingUser.isPresent()) {
-                User user = existingUser.get();
-
-                // 이메일로 가입된 사용자이고, 소셜 로그인 제공자가 다르면 충돌 처리
-                if ("email".equals(user.getProvider())) {
-                    log.warn("이메일 " + userEntity.getEmail() + "로 이미 이메일 가입된 사용자입니다. 이메일 로그인 요청.");
-                    throw new IllegalArgumentException("이 이메일은 이미 등록되어 있습니다. 이메일과 비밀번호로 로그인해 주세요.");
-                } else {
-                    // 소셜 로그인 제공자가 다르면 경고
-                    if (!user.getProvider().equals(userEntity.getProvider())) {
-                        log.warn("이메일 " + userEntity.getEmail() + "로 이미 " + user.getProvider() + "로 가입된 사용자입니다. " + userEntity.getProvider() + "로 로그인하려면 다른 이메일을 사용해 주세요.");
-                        throw new IllegalArgumentException("이 이메일은 이미 " + user.getProvider() + "로 등록되어 있습니다. " + userEntity.getProvider() + "로 로그인하려면 다른 이메일을 사용해 주세요.");
-                    } else {
-                        // 같은 소셜 로그인 제공자일 경우 소셜 로그인 진행
-                        log.info("이메일 " + userEntity.getEmail() + "로 소셜 로그인 성공.");
-                    }
+            if (existingUserOpt.isPresent()) {
+                userEntity = existingUserOpt.get();
+                if (!userEntity.getProvider().equals(provider)) {
+                    throw new IllegalArgumentException("이미 다른 제공자로 가입된 이메일입니다.");
                 }
+                userId = userEntity.getUserId();
             } else {
-                // 이메일이 존재하지 않으면 새로운 소셜 로그인 사용자 저장
-                userRepository.save(userEntity);
-                log.info("이메일 " + userEntity.getEmail() + "로 새로운 소셜 로그인 사용자 저장.");
+                userEntity = new User(providerId, email, provider);
+                userEntity = userRepository.save(userEntity);   //저장 후 userEntity를 영속성 컨텍스트에 반영
+                userId = userEntity.getUserId();
+                log.info("새로운 사용자 저장 완료 - userId: {}" , userId);
+
+                LocalDateTime createdAt = LocalDateTime.now();
+                UserInfo userInfo = new UserInfo(userEntity, nickname, createdAt);
+                userInfoRepository.save(userInfo);
+                log.info("UserInfo 저장 완료 - userId: {}, 닉네임: {}" , userInfo.getUserId(), userInfo.getUserName());
             }
         } catch (Exception e) {
-            log.error("사용자를 데이터베이스에 저장하는 중 오류 발생: " + e.getMessage());
+            log.error("사용자 정보 저장 중 오류 발생: " + e.getMessage());
+            throw new OAuth2AuthenticationException("사용자 정보 저장 실패");
         }
 
-
         //여기 수정
-        return new CustomOAuth2User(providerId, attributes);
+        return new CustomOAuth2User(String.valueOf(userId), attributes);
     }
 }
