@@ -20,12 +20,30 @@ spring:
             - Path=/aiservice/**
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
+            - name: JwtAuthenticationFilter #필터 적용
+              args:
+                order: -1
+
+        - id: userservice-filter
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userservice/user/**
+          filters:
+            - RewritePath=/userservice/user/(?<segment>.*), /user/$\{segment}
+            - name: JwtAuthenticationFilter
+              args:
+                order: -1
+
         - id: userservice
           uri: lb://USER-SERVICE
           predicates:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
+
+
+
+
       # Global CORS 설정
       globalcors:
         corsConfigurations:
