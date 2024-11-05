@@ -42,9 +42,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
 
+//        setRedirectStrategy((request1, response1, url) -> {});//리다이렉트 막기
+
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
         Long userId = Long.valueOf(oAuth2User.getName());   //userId로 변환
+
+        //이부분 변경
+        String redirectUrl = "http://localhost:3000";
+        response.sendRedirect(redirectUrl);
+
+/*
         User user = userRepository.findById(userId).orElse(null);
         UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
         System.out.println("userInfo.userName: " + (userInfo != null ? userInfo.getUserName() : "No UserInfo found"));
@@ -66,6 +74,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.setCharacterEncoding("UTF-8"); // UTF-8 인코딩 강제 설정
         response.getWriter().write(objectMapper.writeValueAsString(responseDto));
         response.setStatus(HttpServletResponse.SC_OK);
+*/
 
     }
 }

@@ -74,7 +74,6 @@ public class WebSecurityConfig {
     protected CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-//        corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 출처 명시
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");

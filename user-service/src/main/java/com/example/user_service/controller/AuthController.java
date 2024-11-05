@@ -9,22 +9,28 @@ import com.example.user_service.dto.response.auth.CheckCertificationResponseDto;
 import com.example.user_service.dto.response.auth.EmailCertificationResponseDto;
 import com.example.user_service.dto.response.auth.SignInResponseDto;
 import com.example.user_service.dto.response.auth.SignUpResponseDto;
+import com.example.user_service.entity.User;
+import com.example.user_service.entity.UserInfo;
+import com.example.user_service.provider.JwtProvider;
+import com.example.user_service.repository.UserInfoRepository;
+import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
+    private final UserInfoRepository userInfoRepository;
 
     //requestbody로 프론트가 보낸 json 데이터 dto 객체로 매핑
     //valid 어노테이션은 dto 에서 정의한 유효성 검사 조건 확인
@@ -68,5 +74,22 @@ public class AuthController {
         return ResponseEntity.ok(new ResponseDto("SUCCESS", "User is authenticated with ROLE_USER."));
     }
 
+    //카톡 소셜 로그인
+    @GetMapping("/auth/social/kakao")
+    public ResponseEntity<SignInResponseDto> handleSocialLoginCallback(@RequestParam Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
 
+        if (user == null || userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null); // 사용자 정보가 없을 경우 401 응답
+        }
+
+        // JWT 토큰 생성
+        String accessToken = jwtProvider.create(String.valueOf(userId), "kakao");
+
+        // 사용자 정보를 포함한 응답 생성
+        SignInResponseDto responseDto = SignInResponseDto.success(accessToken, user, userInfo).getBody();
+        return ResponseEntity.ok(responseDto);
+    }
 }
