@@ -20,7 +20,7 @@ public class UserInfo {
 
     @OneToOne
     @MapsId //User엔티티의 userId를 기본 키로 사용
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
     private String userName;    //이름
