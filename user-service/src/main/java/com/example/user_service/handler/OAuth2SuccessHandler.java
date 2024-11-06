@@ -49,7 +49,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Long userId = Long.valueOf(oAuth2User.getName());   //userId로 변환
 
         //이부분 변경
-        String redirectUrl = "http://localhost:3000";
+        String redirectUrl = "http://localhost:3000/oauth/callback?userId=" + userId;
         response.sendRedirect(redirectUrl);
 
 /*

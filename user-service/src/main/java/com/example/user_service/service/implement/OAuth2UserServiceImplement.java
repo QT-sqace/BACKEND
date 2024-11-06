@@ -47,17 +47,19 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
         Map<String, Object> attributes = oAuth2User.getAttributes();    //가져오는 정보
         log.info("가져오는 값 확인: "+attributes.toString());
 
-        //카카오
+        // 카카오
         if (oauthClientName.equals("kakao")) {
             Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
-            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+            Map<String, Object> profile = kakaoAccount != null ? (Map<String, Object>) kakaoAccount.get("profile") : null;
 
             providerId = String.valueOf(oAuth2User.getAttributes().get("id"));
             provider = "kakao";
-            email = (String) kakaoAccount.get("email");
-            nickname = (String) profile.get("nickname");
-            log.info("Kakao에서 가져오는값 정리 이메일: "+email + " id: " + providerId + " 닉네임: " + nickname);
+            email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
+            nickname = profile != null ? (String) profile.get("nickname") : "Unknown"; // 닉네임이 없을 경우 기본값 설정
+
+            log.info("Kakao에서 가져오는 값 정리 - 이메일: " + email + " id: " + providerId + " 닉네임: " + nickname);
         }
+
 
         //구글
         if (oauthClientName.equals("Google")) {

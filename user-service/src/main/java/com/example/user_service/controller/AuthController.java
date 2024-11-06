@@ -17,6 +17,7 @@ import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -75,8 +77,10 @@ public class AuthController {
     }
 
     //카톡 소셜 로그인
-    @GetMapping("/auth/social/kakao")
-    public ResponseEntity<SignInResponseDto> handleSocialLoginCallback(@RequestParam Long userId) {
+    @GetMapping("/auth/social/kakao/{userId}")
+    public ResponseEntity<SignInResponseDto> kakaoLoginCallback(@PathVariable Long userId) {
+        log.info("kakaoLoginCallback 호출됨, userId: {}", userId); // 요청 확인 로그
+
         User user = userRepository.findById(userId).orElse(null);
         UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
 
@@ -90,6 +94,29 @@ public class AuthController {
 
         // 사용자 정보를 포함한 응답 생성
         SignInResponseDto responseDto = SignInResponseDto.success(accessToken, user, userInfo).getBody();
+        log.info(responseDto.getAccessToken());
+        return ResponseEntity.ok(responseDto);
+    }
+
+    //구글 소셜 로그인
+    @GetMapping("/auth/social/google/{userId}")
+    public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable Long userId) {
+        log.info("googleLoginCallback 호출됨, userId: {}", userId);
+
+        User user = userRepository.findById(userId).orElse(null);
+        UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
+
+        if (user == null || userInfo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
+        }
+
+        //JWT 토큰 생성
+        String accessToken = jwtProvider.create(String.valueOf(userId), "google");
+
+        //사용자 저오를 포함한 응답 생성
+        SignInResponseDto responseDto = SignInResponseDto.success(accessToken, user, userInfo).getBody();
+        log.info(responseDto.getAccessToken());
         return ResponseEntity.ok(responseDto);
     }
 }

@@ -49,8 +49,8 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(request-> request
-                        .requestMatchers("/", "/oauth/**", "/auth/**").permitAll()
-                        .requestMatchers("/user/**","/userservice/**").hasRole("USER")
+                        .requestMatchers("/", "/oauth/**", "/auth/**","/userservice/**").permitAll()
+                        .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()  //나머지는 모든 인증이 필요
                 )
