@@ -97,6 +97,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return null;
         }
 
+        //다시 확인용
         return authorization.substring(7);
+
+/*
+        //변경 시작 부분 - 토큰 에러 발생
+        String token = authorization.substring(7);
+        return StringUtils.hasText(token) ? token : null; // 토큰이 비어 있지 않은지 확인
+*/
+
+
     }
 }
