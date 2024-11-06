@@ -54,7 +54,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String registrationId = oAuth2User.getRegistrationId();
         String redirectUrl;
 
-        if ("google".equals(registrationId)) {
+        //연동 과정에 따라 다른 리다이렉트 실행 (반환값 다르게 하기 위함)
+        if ("Google".equals(registrationId)) {
             log.info("구글 리다이렉트 실행!!!!!!!!!!!!!!!");
             redirectUrl = "http://localhost:3000/oauth/callback/google?userId=" + userId;
         } else if ("kakao".equals(registrationId)) {
@@ -68,30 +69,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         response.sendRedirect(redirectUrl);
 
-
-/*
-        User user = userRepository.findById(userId).orElse(null);
-        UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
-        System.out.println("userInfo.userName: " + (userInfo != null ? userInfo.getUserName() : "No UserInfo found"));
-
-        if (user == null || userInfo == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found.");
-            return;
-        }
-
-
-        String provider = oAuth2User.getAttributes().containsKey("sub") ? "google" : "kakao";
-        String accessToken = jwtProvider.create(String.valueOf(userId), provider);
-
-        //이메일 로그인과 동일한 형식으로 json 응답 생성
-        SignInResponseDto responseDto = SignInResponseDto.success(accessToken, user, userInfo).getBody();
-
-//        log.info("반환되는 시간 형식 확인용도:111111111111111111" +responseDto.getCreatedAt().toString());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8"); // UTF-8 인코딩 강제 설정
-        response.getWriter().write(objectMapper.writeValueAsString(responseDto));
-        response.setStatus(HttpServletResponse.SC_OK);
-*/
 
     }
 }
