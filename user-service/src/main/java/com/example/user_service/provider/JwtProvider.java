@@ -36,7 +36,9 @@ public class JwtProvider {
                 .setExpiration(expiredDate)
                 .compact();
     }
-    // JWT 검증 및 클레임 추출
+
+/*    // JWT 검증 및 클레임 추출
+//아래 예외처리가 더 정확해서 아래꺼 사용
     public Map<String, Object> validate(String jwt) {
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
@@ -50,8 +52,8 @@ public class JwtProvider {
             exception.printStackTrace();
             return null;
         }
-    }
-/*
+    }*/
+
     // JwtProvider.java - validate 메서드 수정
     //토큰 생성 에러 확인용
     public Map<String, Object> validate(String jwt) {
@@ -75,6 +77,6 @@ public class JwtProvider {
             log.error("Error parsing JWT: " + e.getMessage());
             return null;
         }
-    }*/
+    }
 }
 

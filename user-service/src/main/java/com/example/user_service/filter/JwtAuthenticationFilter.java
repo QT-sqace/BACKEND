@@ -37,6 +37,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // /auth 경로는 JWT 검증을 하지 않음
+        String path = request.getServletPath();
+        if (path.startsWith("/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             //jwt 토큰을 Authorization 헤더에서 추출
             String token = parseBearerToken(request);
@@ -98,13 +105,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         //다시 확인용
-        return authorization.substring(7);
+//        return authorization.substring(7);
 
-/*
         //변경 시작 부분 - 토큰 에러 발생
         String token = authorization.substring(7);
         return StringUtils.hasText(token) ? token : null; // 토큰이 비어 있지 않은지 확인
-*/
 
 
     }
