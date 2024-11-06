@@ -98,6 +98,6 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
         }
 
         //여기 수정
-        return new CustomOAuth2User(String.valueOf(userId), attributes);
+        return new CustomOAuth2User(String.valueOf(userId), attributes, oauthClientName);
     }
 }

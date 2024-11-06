@@ -42,15 +42,32 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
 
-//        setRedirectStrategy((request1, response1, url) -> {});//리다이렉트 막기
 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
         Long userId = Long.valueOf(oAuth2User.getName());   //userId로 변환
 
+/*
         //이부분 변경
         String redirectUrl = "http://localhost:3000/oauth/callback?userId=" + userId;
+*/
+// registrationId를 통해 로그인 제공자를 구분
+        String registrationId = oAuth2User.getRegistrationId();
+        String redirectUrl;
+
+        if ("google".equals(registrationId)) {
+            log.info("구글 리다이렉트 실행!!!!!!!!!!!!!!!");
+            redirectUrl = "http://localhost:3000/oauth/callback/google?userId=" + userId;
+        } else if ("kakao".equals(registrationId)) {
+            log.info("카카오 리다이렉트 실행!!!!!!!!!!!!!!!");
+            redirectUrl = "http://localhost:3000/oauth/callback/kakao?userId=" + userId;
+        } else {
+            // 기본 리다이렉트 경로 설정
+            log.info("기본 리다이렉트 실행!!!!!!!!!!!!!!!");
+            redirectUrl = "http://localhost:3000/oauth/callback?userId=" + userId;
+        }
+
         response.sendRedirect(redirectUrl);
+
 
 /*
         User user = userRepository.findById(userId).orElse(null);
