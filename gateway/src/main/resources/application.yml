@@ -15,17 +15,40 @@ spring:
     gateway:
       routes:
         - id: aiservice
-          uri: lb://AISERVICE
+          uri: lb://AI-SERVICE
           predicates:
             - Path=/aiservice/**
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
+            - name: JwtAuthenticationFilter #필터 적용
+#
+#        - id: userservice-filter
+#          uri: lb://USER-SERVICE
+#          predicates:
+#            - Path=/userservice/user/**
+#          filters:
+#            - RewritePath=/userservice/user/(?<segment>.*), /user/$\{segment}
+#            - name: JwtAuthenticationFilter
+#              args:
+#                order: -1
+
+
         - id: userservice
           uri: lb://USER-SERVICE
           predicates:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
+
+        - id: teamservice
+          uri: lb://TEAM-SERVICE
+          predicates:
+            - Path=/teamservice/**
+          filters:
+            - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
+
+
+
       # Global CORS 설정
       globalcors:
         corsConfigurations:
@@ -38,7 +61,11 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
+            allowed-headers:
+              - "*"
             allowCredentials: true  # 인증 정보 포함
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 logging:
   level:
     org.springframework: DEBUG

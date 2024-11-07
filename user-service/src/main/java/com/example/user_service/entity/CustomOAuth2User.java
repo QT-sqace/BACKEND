@@ -16,6 +16,7 @@ public class CustomOAuth2User implements OAuth2User {
 //    private String providerId;
     private String userId;
     private Map<String, Object> attributes;
+    private String registrationId;  //kakao, google 구분
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -31,5 +32,9 @@ public class CustomOAuth2User implements OAuth2User {
     @Override
     public String getName() {
         return this.userId; //사용자 ID 반환
+    }
+
+    public String getRegistrationId() {
+        return registrationId;
     }
 }
