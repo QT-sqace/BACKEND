@@ -46,11 +46,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Long userId = Long.valueOf(oAuth2User.getName());   //userId로 변환
 
-/*
-        //이부분 변경
-        String redirectUrl = "http://localhost:3000/oauth/callback?userId=" + userId;
-*/
-// registrationId를 통해 로그인 제공자를 구분
+        // registrationId를 통해 로그인 제공자를 구분
         String registrationId = oAuth2User.getRegistrationId();
         String redirectUrl;
 
