@@ -13,6 +13,11 @@ java {
     }
 }
 
+bootJar {
+    mainClass = 'com.example.AiServiceApplication' // 여기에 실제 메인 클래스의 경로를 입력
+}
+
+
 repositories {
     mavenCentral()
 }

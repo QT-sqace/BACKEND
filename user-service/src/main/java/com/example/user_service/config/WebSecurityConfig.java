@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,13 +35,9 @@ public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2UserServiceImplement oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    @Value("${profile.image.url}")
-    private String profileImageUrl;
 
     @Bean   //필터 설정
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
-
-
 
         httpSecurity
                 .cors(cors -> cors
@@ -53,8 +48,9 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(request-> request
-                        .requestMatchers("/", "/oauth/**", "/auth/**","/userservice/**", "/images/**").permitAll()
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/", "/oauth/**", "/auth/**", "/userservice/**", "/images/**").permitAll()
+                        .requestMatchers("/jira/auth/login", "/jira/auth/callback").permitAll() // 추가된 경로
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()  //나머지는 모든 인증이 필요
