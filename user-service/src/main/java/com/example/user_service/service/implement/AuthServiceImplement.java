@@ -21,6 +21,7 @@ import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +42,10 @@ public class AuthServiceImplement implements AuthService {
     private final JwtProvider jwtProvider;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    //기본 프로필 경로
+    @Value("${profile.image.default}")
+    private String defaultProfileImage;
 
     //강의는 userId로 중복 체크 진행함
 
@@ -97,6 +102,7 @@ public class AuthServiceImplement implements AuthService {
     }
 
     //회원 이메일 가입
+    //처음가입시 프로필이미지 수정
     @Override
     public ResponseEntity<? super SignUpResponseDto> signUp(SignUpRequestDto dto) {
         try {
@@ -119,7 +125,7 @@ public class AuthServiceImplement implements AuthService {
 
 //            log.info("user엔티티 확인: "+ userEntity.toString());
             //유저 정보 저장
-            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt);
+            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt,defaultProfileImage);
             userInfoRepository.save(userInfoEntity);
 
             //저장 후에는 인증번호 삭제

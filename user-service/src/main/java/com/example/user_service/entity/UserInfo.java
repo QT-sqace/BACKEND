@@ -24,16 +24,20 @@ public class UserInfo {
     private User user;
 
     private String userName;    //이름
+    private String contactEmail;    //연락받을 이메일
     private String address;     //주소
     private String phoneNumber; //전화번호
+    private String company;     //회사
+    private String profileImage;    //프로필 이미지 경로
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public UserInfo(User user, String userName, LocalDateTime createdAt) {
+    public UserInfo(User user, String userName, LocalDateTime createdAt, String profileImage) {
         this.user = user;
         this.userName = userName;
         this.createdAt = createdAt;
+        this.profileImage = profileImage;
     }
 }

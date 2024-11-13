@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +70,27 @@ public class AuthController {
         return response;
     }
 
+    //로그인 상태 유지
+    @GetMapping("/user/info")
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+        //SecurityContext에서 userId를 추출
+        Long userId = Long.valueOf((String) authentication.getPrincipal());
+
+        //user 및 UserInfo 데이터 조회
+        User user = userRepository.findById(userId).orElse(null);
+        UserInfo userInfo = userInfoRepository.findById(userId).orElse(null);
+
+        //사용자 정보가 없을 경우 처리
+        if (user == null || userInfo == null) {
+            return SignInResponseDto.signInFail();
+        }
+        String provider = user.getProvider();
+        String newAccessToken = jwtProvider.create(String.valueOf(userId), provider);
+
+        //새로운 액세스토큰 발급
+        return SignInResponseDto.success(newAccessToken, user, userInfo);
+    }
+
     //임시 jwt 확인용
     @GetMapping("/user/check")
     public ResponseEntity<ResponseDto> check() {
@@ -101,6 +123,7 @@ public class AuthController {
     //구글 소셜 로그인
     @GetMapping("/auth/social/google/{userId}")
     public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable Long userId) {
+
         log.info("googleLoginCallback 호출됨, userId: {}", userId);
 
         User user = userRepository.findById(userId).orElse(null);
@@ -114,9 +137,10 @@ public class AuthController {
         //JWT 토큰 생성
         String accessToken = jwtProvider.create(String.valueOf(userId), "google");
 
-        //사용자 저오를 포함한 응답 생성
+        //사용자 정보를 포함한 응답 생성
         SignInResponseDto responseDto = SignInResponseDto.success(accessToken, user, userInfo).getBody();
         log.info(responseDto.getAccessToken());
         return ResponseEntity.ok(responseDto);
     }
+
 }

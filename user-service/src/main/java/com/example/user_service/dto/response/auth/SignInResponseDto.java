@@ -23,6 +23,10 @@ public class SignInResponseDto extends ResponseDto {
     private String userName;
     private String address;
     private String phoneNumber;
+    private String contactEmail;
+    private String company;
+    private String profileImage;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
@@ -34,7 +38,7 @@ public class SignInResponseDto extends ResponseDto {
         this.expirationTime = 43200;
     }
 
-    private SignInResponseDto(String accessToken,Long userId, String email, String userName, String address, String phoneNumber, LocalDateTime createdAt) {
+    private SignInResponseDto(String accessToken,Long userId, String email, String userName, String address, String phoneNumber, String contactEmail, String company, String profileImage, LocalDateTime createdAt) {
         super();
         this.accessToken = accessToken;
         this.expirationTime = 43200;
@@ -43,6 +47,9 @@ public class SignInResponseDto extends ResponseDto {
         this.userName = userName;
         this.address = address;
         this.phoneNumber = phoneNumber;
+        this.contactEmail = contactEmail;
+        this.company = company;
+        this.profileImage = profileImage;
         this.createdAt = createdAt;
     }
 
@@ -55,6 +62,9 @@ public class SignInResponseDto extends ResponseDto {
                 userinfo.getUserName(),
                 userinfo.getAddress(),
                 userinfo.getPhoneNumber(),
+                userinfo.getContactEmail(),
+                userinfo.getCompany(),
+                userinfo.getProfileImage(),
                 userinfo.getCreatedAt()
                 );
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
