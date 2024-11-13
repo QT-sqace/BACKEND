@@ -36,7 +36,7 @@ public class WebSecurityConfig {
     private final OAuth2UserServiceImplement oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    @Bean   //필터 설정
+    @Bean   // 필터 설정
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
@@ -48,29 +48,30 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(request-> request
-                        .requestMatchers("/", "/oauth/**", "/auth/**","/userservice/**").permitAll()
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/", "/oauth/**", "/auth/**", "/userservice/**").permitAll()
+                        .requestMatchers("/jira/auth/login", "/jira/auth/callback").permitAll() // 추가된 경로
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()  //나머지는 모든 인증이 필요
+                        .anyRequest().authenticated()  // 나머지는 모든 인증이 필요
                 )
-                //소셜 로그인 부분
+                // 소셜 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint.baseUri("/auth/social"))
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/oauth2/callback/*"))
-                        .userInfoEndpoint(endpoint-> endpoint.userService(oAuth2UserService))
+                        .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 )
-                //인증 실패시 아래 만든 예외응답 사용
-                .exceptionHandling(exceptionHandling-> exceptionHandling
+                // 인증 실패 처리
+                .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
                 )
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-                return httpSecurity.build();
+
+        return httpSecurity.build();
     }
 
-    @Bean   //cors 설정
+    @Bean   // CORS 설정
     protected CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -83,10 +84,9 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration);
 
         return source;
-
     }
 
-    //여기 static class인지 확인해야함
+    // 인증 실패 시 응답 처리
     static class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         @Override
@@ -98,6 +98,3 @@ public class WebSecurityConfig {
         }
     }
 }
-
-
-

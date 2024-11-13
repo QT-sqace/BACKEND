@@ -15,7 +15,7 @@ public class TeamInvite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long invite_id;
 
     @Column(nullable = false, unique = true)
     private String inviteToken; // 초대 토큰
