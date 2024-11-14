@@ -21,17 +21,6 @@ spring:
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
             - name: JwtAuthenticationFilter #필터 적용
-#
-#        - id: userservice-filter
-#          uri: lb://USER-SERVICE
-#          predicates:
-#            - Path=/userservice/user/**
-#          filters:
-#            - RewritePath=/userservice/user/(?<segment>.*), /user/$\{segment}
-#            - name: JwtAuthenticationFilter
-#              args:
-#                order: -1
-
 
         - id: userservice
           uri: lb://USER-SERVICE
@@ -46,6 +35,13 @@ spring:
             - Path=/teamservice/**
           filters:
             - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
+
+        - id: calendarservice
+          uri: lb://CALENDAR-SERVICE
+          predicates:
+            - Path=/calendarservice/**
+          filters:
+            - RewritePath=/calendarservice/(?<segment>.*), /$\{segment}
 
 
 
