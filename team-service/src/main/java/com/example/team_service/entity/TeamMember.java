@@ -14,25 +14,25 @@ import java.time.LocalDateTime;
 public class TeamMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "team_id", nullable = false)
-    private Team team;
+    private Long teamMemberId;
 
     @Column(name = "user_id", nullable = false)
-    private Long user_id;
+    private Long userId;
 
     @Column(nullable = false)
     private String role;
 
     @Column(name = "joined_at", nullable = false)
-    private LocalDateTime joined_at;
+    private LocalDateTime joinedAt;
 
-    public TeamMember(Team team, Long user_id, String role, LocalDateTime joined_at) {
+    @ManyToOne
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
+
+    public TeamMember(Team team, Long userId, String role, LocalDateTime joinedAt) {
         this.team = team;
-        this.user_id = user_id;
+        this.userId = userId;
         this.role = role;
-        this.joined_at = joined_at;
+        this.joinedAt = joinedAt;
     }
 }

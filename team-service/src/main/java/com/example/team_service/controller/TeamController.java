@@ -2,8 +2,9 @@ package com.example.team_service.controller;
 
 import com.example.team_service.dto.TeamCreateRequestDto;
 import com.example.team_service.service.TeamService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.team_service.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,24 +12,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/teams")
+@Slf4j
 public class TeamController {
 
     private final TeamService teamService;
+    private final JwtUtil jwtUtil;
 
-    public TeamController(TeamService teamService) {
-        this.teamService = teamService;
-    }
-
+    //팀 생성 요청
     @PostMapping("/create")
-    public ResponseEntity<String> createTeam(@RequestBody TeamCreateRequestDto request) {
-        if (!request.getPassword().equals(request.getConfirm_password())) {
-            return ResponseEntity.badRequest().body("Passwords do not match.");
-        }
-
-        // 현재 사용자 ID를 SecurityContextHolder에서 가져옴
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long creatorUserId = Long.parseLong(authentication.getName()); // 현재 사용자 ID 가져오기
+    public ResponseEntity<String> createTeam(@RequestBody TeamCreateRequestDto request,
+                                             @RequestHeader("Authorization") String token) {
+        //토큰에서 userId 가져오기
+        Long creatorUserId = jwtUtil.extractedUserIdFromHeader(token);
+        log.info("userId값 확인= {}", creatorUserId );
 
         teamService.createTeam(request, creatorUserId); // 사용자 ID를 서비스에 전달
         return ResponseEntity.ok("Team created successfully.");

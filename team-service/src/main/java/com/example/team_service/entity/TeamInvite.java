@@ -15,13 +15,13 @@ public class TeamInvite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long invite_id;
+    private Long inviteId;
 
     @Column(nullable = false, unique = true)
     private String inviteToken; // 초대 토큰
 
     @Column(nullable = false)
-    private LocalDateTime expiration_time; // 만료 시간
+    private LocalDateTime expirationTime; // 만료 시간
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
@@ -29,7 +29,7 @@ public class TeamInvite {
 
     public TeamInvite(String inviteToken, LocalDateTime expiration_time, Team team) {
         this.inviteToken = inviteToken;
-        this.expiration_time = expiration_time;
+        this.expirationTime = expiration_time;
         this.team = team;
     }
 }

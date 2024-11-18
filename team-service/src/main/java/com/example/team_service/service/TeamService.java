@@ -9,6 +9,8 @@ import com.example.team_service.entity.TeamMember;
 import com.example.team_service.repository.TeamInviteRepository;
 import com.example.team_service.repository.TeamMemberRepository;
 import com.example.team_service.repository.TeamRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class TeamService {
 
     private final TeamRepository teamRepository;
@@ -24,28 +28,19 @@ public class TeamService {
     private final UserServiceClient userServiceClient;
     private final PasswordEncoder passwordEncoder;
 
-    public TeamService(TeamRepository teamRepository,
-                       TeamMemberRepository teamMemberRepository,
-                       TeamInviteRepository teamInviteRepository,
-                       UserServiceClient userServiceClient,
-                       PasswordEncoder passwordEncoder) {
-        this.teamRepository = teamRepository;
-        this.teamMemberRepository = teamMemberRepository;
-        this.teamInviteRepository = teamInviteRepository;
-        this.userServiceClient = userServiceClient;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     // 팀 생성
-    public void createTeam(TeamCreateRequestDto request, Long creator_user_id) {
+    public void createTeam(TeamCreateRequestDto request, Long creatorUserId) {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
+        log.info("team레포 시작");
         // 팀 생성 시 생성자가 관리자
-        Team team = new Team(request.getProject_name(), encodedPassword, request.getProject_image(), creator_user_id);
+        Team team = new Team(request.getProjectName(), encodedPassword, request.getProjectImage(), creatorUserId);
         teamRepository.save(team);
 
+        log.info("팀 멤버 레포 시작");
         // 생성자를 팀 멤버로 추가하면서 관리자 역할로 설정
-        TeamMember teamMember = new TeamMember(team, creator_user_id, "admin", LocalDateTime.now());
+        TeamMember teamMember = new TeamMember(team, creatorUserId, "admin", LocalDateTime.now());
         teamMemberRepository.save(teamMember);
     }
 
@@ -67,7 +62,7 @@ public class TeamService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid invite token."));
 
         // 초대 토큰 만료 시간 검증
-        if (invite.getExpiration_time().isBefore(LocalDateTime.now())) {
+        if (invite.getExpirationTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Expired invite token.");
         }
 
