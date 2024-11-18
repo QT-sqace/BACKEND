@@ -32,11 +32,9 @@ public class UserCalendarController {
     //개인 일정 조회
     @GetMapping("/events")
     public ResponseEntity<BasicResponseDto> getUserEvents(@RequestHeader("Authorization") String token) {
-        //토큰에서 userID값 추출
-        String jwt = token.substring(7);
-        Long userId = jwtUtil.extractedUserId(jwt); //userId값 추출
-        log.info("userId 확인 ={}", userId);
 
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+        log.info("userId 확인 ={}", userId);
         //개인 일정과 팀 일정 모두 조회
         List<UserEventResponseDto> events = calendarService.getUserEvents(userId);
         return ResponseEntity.ok(BasicResponseDto.success("일정 조회 완료", events));
@@ -46,12 +44,32 @@ public class UserCalendarController {
     @PostMapping("/events")
     public ResponseEntity<BasicResponseDto> createEvent(@RequestBody UserEventRequestDto requestDto,
                                                         @RequestHeader("Authorization") String token) {
-        //토큰에서 userID값 추출
-        String jwt = token.substring(7);
-        Long userId = jwtUtil.extractedUserId(jwt); //userId값 추출
-        log.info("userId 확인 ={}", userId);
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
         calendarService.createEvent(userId, requestDto);
         return ResponseEntity.ok(BasicResponseDto.success("이벤트 생성 완료",null));
     }
 
+    //개인 일정 수정
+    @PutMapping("/events/{eventId}")
+    public ResponseEntity<BasicResponseDto> updatePersonalEvent(@PathVariable Long eventId,
+                                                                @RequestBody UserEventRequestDto requestDto,
+                                                                @RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+
+        //개인 일정 수정
+        calendarService.updatePersonalEvent(eventId, userId, requestDto);
+
+        return ResponseEntity.ok(BasicResponseDto.success("일정 수정 완료", null));
+    }
+
+    //개인 일정 삭제
+    @DeleteMapping("/events/{eventId}")
+    public ResponseEntity<BasicResponseDto> deletePersonalEvent(@PathVariable Long eventId,
+                                                                @RequestHeader("Authorization") String token) {
+        //토큰에서 userId값 추출
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+        calendarService.deletePersonalEvent(eventId, userId);
+
+        return ResponseEntity.ok(BasicResponseDto.success("일정 삭제 완료", null));
+    }
 }

@@ -56,4 +56,14 @@ public class CalendarInfo {
         this.color = color;
         this.eventType = eventType;
     }
+
+    //일정 수정시 사용
+    public void updateEvent(String title, String content, String startDate, String endDate, Boolean allDay, String color) {
+        this.title = title;
+        this.content = content;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.allDay = allDay;
+        this.color = color;
+    }
 }

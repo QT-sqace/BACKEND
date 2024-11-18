@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface CalendarSharedRepository extends JpaRepository<CalendarShared, Long> {
     List<CalendarShared> findByCalendarId(Long calendarId);
+
+    void deleteByCalendarIdAndEventId(Long eventId,Long calendarId);
 }

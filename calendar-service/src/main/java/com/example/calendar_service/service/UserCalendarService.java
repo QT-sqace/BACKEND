@@ -81,4 +81,47 @@ public class UserCalendarService {
 
         return allEvents;
     }
+
+    //캘린더 일정 수정하기
+    public void updatePersonalEvent(Long eventId, Long userId, UserEventRequestDto requestDto) {
+        //eventId로 일정 조회
+        CalendarInfo event = calendarInfoRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 일정이 존재하지 않습니다."));
+
+        //PERSONAL 일정인지 검증
+        if (event.getEventType() != CalendarInfo.EventType.PERSONAL) {
+            throw new IllegalStateException("팀 일정은 수정할 수 없습니다.");
+        }
+
+        //요청한 userId 와 일정 소유자 검증
+        if (!event.getCalendar().getUserId().equals(userId)) {
+            throw new IllegalStateException("본인의 일정만 수정할 수 있습니다");
+        }
+
+        //수정 가능한 필드 업데이트
+        event.updateEvent(requestDto.getTitle(), requestDto.getContent(), requestDto.getStartDate(),
+                requestDto.getEndDate(), requestDto.getAllDay(), requestDto.getColor());
+
+        calendarInfoRepository.save(event);
+    }
+
+    //캘린더 일정 수정하기
+    public void deletePersonalEvent(Long eventId, Long userId) {
+        //eventID로 일정 조회
+        CalendarInfo event = calendarInfoRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 일정이 존재하지 않습니다."));
+
+        //personal인지 team인지 따라 삭제 로직 분리
+        if (event.getEventType() == CalendarInfo.EventType.PERSONAL) {
+            //개인 일정은 실제 데이터 삭제
+            if (!event.getCalendar().getUserId().equals(userId)) {
+                throw new IllegalStateException("본인의 일정만 삭제가능합니다.");
+            }
+            calendarInfoRepository.delete(event);
+        } else if ( event.getEventType() == CalendarInfo.EventType.TEAM) {
+            //팀 일정은 캘린더shared를 지워서 개인 캘린더에 표시 x
+            Calendar calendar = calendarRepository.findByUserId(userId);
+            calendarSharedRepository.deleteByCalendarIdAndEventId(eventId,calendar.getCalendarId());
+        }
+    }
 }

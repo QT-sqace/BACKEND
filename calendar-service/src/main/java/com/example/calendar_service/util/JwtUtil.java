@@ -35,4 +35,18 @@ public class JwtUtil {
                 .getBody();
         return Long.parseLong(claims.getSubject()); //userId 값 추출
     }
+
+    //userId값을 추출하는 메서드
+    public Long extractedUserIdFromHeader(String authorizationHeader) {
+        String token = parseBearerToken(authorizationHeader);
+        return extractedUserId(token);
+    }
+
+    //Authorization 헤더에서 Bearer 토큰 추출
+    private String parseBearerToken(String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        throw new IllegalArgumentException("유효하지 않은 Authorization 헤더입니다.");
+    }
 }

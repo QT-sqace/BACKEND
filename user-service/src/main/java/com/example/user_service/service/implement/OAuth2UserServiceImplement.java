@@ -1,5 +1,7 @@
 package com.example.user_service.service.implement;
 
+import com.example.user_service.client.CalendarServiceClient;
+import com.example.user_service.dto.external.UserCalendarRequestDto;
 import com.example.user_service.entity.CustomOAuth2User;
 import com.example.user_service.entity.User;
 import com.example.user_service.entity.UserInfo;
@@ -30,6 +32,7 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
+    private final CalendarServiceClient calendarServiceClient;
 
     //기본 프로필 경로
     @Value("${profile.image.default}")
@@ -117,8 +120,12 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
                 LocalDateTime createdAt = LocalDateTime.now();
                 UserInfo userInfo = new UserInfo(userEntity, nickname, createdAt, defaultProfileImage);
                 userInfoRepository.save(userInfo);
+                //캘린더 서비스로 개인 캘린더 생성 요청
+                UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
+                calendarServiceClient.createPersonalCalendar(requestDto);
                 log.info("새로운 사용자 저장 완료 - userId: {}" , userId);
                 log.info("UserInfo 저장 완료 - userId: {}, 닉네임: {}" , userInfo.getUserId(), userInfo.getUserName());
+                log.info("캘린더 생성요청 완료");
             }
         } catch (Exception e) {
             log.error("사용자 정보 저장 중 오류 발생: " + e.getMessage());
