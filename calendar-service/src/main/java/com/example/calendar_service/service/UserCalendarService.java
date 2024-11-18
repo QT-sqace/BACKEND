@@ -105,7 +105,7 @@ public class UserCalendarService {
         calendarInfoRepository.save(event);
     }
 
-    //캘린더 일정 수정하기
+    //캘린더 일정 삭제하기
     public void deletePersonalEvent(Long eventId, Long userId) {
         //eventID로 일정 조회
         CalendarInfo event = calendarInfoRepository.findById(eventId)

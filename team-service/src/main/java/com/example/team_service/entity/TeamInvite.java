@@ -8,7 +8,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor
 public class TeamInvite {
@@ -27,9 +26,9 @@ public class TeamInvite {
     @JoinColumn(name = "team_id", nullable = false)
     private Team team; // 초대된 팀 참조
 
-    public TeamInvite(String inviteToken, LocalDateTime expiration_time, Team team) {
+    public TeamInvite(String inviteToken, Team team) {
         this.inviteToken = inviteToken;
-        this.expirationTime = expiration_time;
         this.team = team;
+        this.expirationTime = LocalDateTime.now().plusHours(24);    //토큰 만료시간 24시간
     }
 }

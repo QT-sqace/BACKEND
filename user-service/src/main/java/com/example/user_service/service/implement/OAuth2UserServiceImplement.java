@@ -120,9 +120,10 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
                 LocalDateTime createdAt = LocalDateTime.now();
                 UserInfo userInfo = new UserInfo(userEntity, nickname, createdAt, defaultProfileImage);
                 userInfoRepository.save(userInfo);
-                //캘린더 서비스로 개인 캘린더 생성 요청
-                UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
-                calendarServiceClient.createPersonalCalendar(requestDto);
+                //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
+//                UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
+//                calendarServiceClient.createPersonalCalendar(requestDto);
+
                 log.info("새로운 사용자 저장 완료 - userId: {}" , userId);
                 log.info("UserInfo 저장 완료 - userId: {}, 닉네임: {}" , userInfo.getUserId(), userInfo.getUserName());
                 log.info("캘린더 생성요청 완료");

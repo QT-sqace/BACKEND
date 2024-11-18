@@ -1,7 +1,7 @@
 package com.example.team_service.client;
 
 import com.example.team_service.config.FeignClientConfig;
-import com.example.team_service.dto.BasicInfoDto;
+import com.example.team_service.dto.external.BasicInfoDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,7 +1,7 @@
 package com.example.team_service.controller;
 
 import com.example.team_service.client.UserServiceClient;
-import com.example.team_service.dto.TestDto;
+import com.example.team_service.dto.external.TestDto;
 import com.example.team_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

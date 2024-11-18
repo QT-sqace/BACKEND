@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface TeamInviteRepository extends JpaRepository<TeamInvite, Long> {
-    Optional<TeamInvite> findByInviteToken(String invite_token); // inviteToken으로 초대 조회
+    Optional<TeamInvite> findByInviteToken(String inviteToken);
 }

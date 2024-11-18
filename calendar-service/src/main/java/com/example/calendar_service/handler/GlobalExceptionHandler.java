@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    //모든 예외를 처리하는 기본 핸들러
+    //우선은 모든 예외를 처리하는 기본 핸들러
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BasicResponseDto> handleAllException(Exception ex) {
