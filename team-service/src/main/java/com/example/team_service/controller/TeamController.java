@@ -4,6 +4,7 @@ import com.example.team_service.dto.BasicResponseDto;
 import com.example.team_service.dto.request.JoinTeamRequestDto;
 import com.example.team_service.dto.request.TeamCreateRequestDto;
 import com.example.team_service.dto.request.ValidTokenRequestDto;
+import com.example.team_service.dto.response.TeamListResponseDto;
 import com.example.team_service.service.TeamService;
 import com.example.team_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -48,6 +50,16 @@ public class TeamController {
         log.info("userId값 확인 {}",userId);
         teamService.joinTeam(request.getInviteToken(), request.getPassword(), userId);
         return ResponseEntity.ok(BasicResponseDto.success("팀에 성공적으로 가입되었습니다.", null));
+    }
+
+    //본인 팀리스트 조회
+    @GetMapping("/my-teams")
+    public ResponseEntity<BasicResponseDto<List<TeamListResponseDto>>> getTeams(
+            @RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+        List<TeamListResponseDto> teams = teamService.getTeamsByUserId(userId);
+
+        return ResponseEntity.ok(BasicResponseDto.success("팀 목록 조회 성공", teams));
     }
 
 }

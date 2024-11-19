@@ -1,6 +1,10 @@
 package com.example.team_service.service;
 
+import com.example.team_service.client.CalendarServiceClient;
+import com.example.team_service.client.UserServiceClient;
+import com.example.team_service.dto.external.TeamCalendarRequestDto;
 import com.example.team_service.dto.request.TeamCreateRequestDto;
+import com.example.team_service.dto.response.TeamListResponseDto;
 import com.example.team_service.entity.Team;
 import com.example.team_service.entity.TeamInvite;
 import com.example.team_service.entity.TeamMember;
@@ -13,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,6 +31,8 @@ public class TeamService {
     private final TeamInviteRepository teamInviteRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final CalendarServiceClient calendarServiceClient;
+    private final UserServiceClient userServiceClient;
 
 
     // 팀 생성, 추후에 팀 로고 이미지를 MinIo 경로로 등록하는 로직 필요
@@ -48,6 +55,10 @@ public class TeamService {
                 LocalDateTime.now()
         );
         teamMemberRepository.save(masterMember);
+
+        //팀 캘린더 생성 요청 (Feign Client 호출)
+        TeamCalendarRequestDto requestDto = new TeamCalendarRequestDto(team.getTeamId());
+        calendarServiceClient.createTeamCalendar(requestDto);
 
         //초대 링크 발송
         for (String email : request.getEmails()) {
@@ -112,5 +123,32 @@ public class TeamService {
 
         log.info("회원번호: {} 성공적으로 팀에 가입 팀명: {}  ", userId, team.getProjectName());
 
+    }
+
+    //팀리스트 반환
+    public List<TeamListResponseDto> getTeamsByUserId(Long userId) {
+        //사용자 가입 팀 목록 조회
+        List<TeamMember> teamMembers = teamMemberRepository.findByUserId(userId);
+
+        //각 팀의 정보를 DTO로 변환
+        List<TeamListResponseDto> teamList = teamMembers.stream()
+                .map(member -> {
+                    Team team = member.getTeam();
+
+                    //각 팀 멤버들의 프로필 이미지 경로 조회
+                    List<String> memberImages = team.getMembers().stream()
+                            .map(m -> userServiceClient.getUserProfile(m.getUserId()))
+                            .toList();
+
+                    return new TeamListResponseDto(
+                            team.getProjectName(),
+                            team.getProjectImage(),
+                            team.getMembers().size(),
+                            memberImages
+                    );
+                })
+                .toList();
+
+        return teamList;
     }
 }
