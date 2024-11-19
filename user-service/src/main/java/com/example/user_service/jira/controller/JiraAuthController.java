@@ -33,7 +33,7 @@ public class JiraAuthController {
                 "&redirect_uri=" + jiraConfig.getRedirectUri() +
                 "&state=" + UUID.randomUUID().toString() +  // 무작위 상태 값
                 "&response_type=code" +
-                "&prompt=consent";
+                "&prompt=none";
 
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", authUrl).build();
     }

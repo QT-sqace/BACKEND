@@ -28,9 +28,6 @@ public class JiraAuthServiceImpl implements JiraAuthService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private UserOauthRepository userOauthRepository;
 
     // 액세스 토큰을 임시 저장할 변수
@@ -95,24 +92,24 @@ public class JiraAuthServiceImpl implements JiraAuthService {
         String email = (String) userInfoMap.get("email");
         String providerId = (String) userInfoMap.get("account_id");
 
-        // User 엔티티 저장 (이미 존재하는 경우는 생략)
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            user = new User(providerId, email, "jira");
-            userRepository.save(user);
-        }
+        // 현재 사용자의 ID 가져오기 (Spring Security 또는 요청에서 추출)
+        Long currentUserId = getCurrentUserId();
 
         // UserOauth 엔티티 저장
-        UserOauth userOauth = userOauthRepository.findByUserId(user.getUserId());
+        UserOauth userOauth = userOauthRepository.findByUserId(currentUserId);
         if (userOauth == null) {
             userOauth = new UserOauth();
-            userOauth.setUserId(user.getUserId());
+            userOauth.setUserId(currentUserId);
             userOauth.setLinkedProvider("jira");
             userOauth.setLinkedProviderId(providerId);
         }
         userOauth.setAccessToken(accessToken);
         userOauth.setLinkedAt(new Timestamp(System.currentTimeMillis()));
+
+        // user_oauth 테이블에 저장
         userOauthRepository.save(userOauth);
+
+        logger.info("User info saved to user_oauth table successfully.");
     }
 
     private Map<String, Object> parseUserInfo(String userInfo) {
