@@ -144,6 +144,7 @@ public class TeamService {
                             team.getTeamId(),
                             team.getProjectName(),
                             team.getProjectImage(),
+                            member.getRole().name(),
                             team.getMembers().size(),
                             memberImages
                     );
