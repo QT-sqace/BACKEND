@@ -2,7 +2,7 @@ FROM gradle:8.3-jdk17 AS build
 
 WORKDIR /app
 
-COPY build.gradle settings.gradle./
+COPY build.gradle settings.gradle ./
 RUN gradle dependencies --no-daemon
 
 COPY src ./src
