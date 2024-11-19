@@ -132,8 +132,8 @@ public class AuthServiceImplement implements AuthService {
             userInfoRepository.save(userInfoEntity);
 
             //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
-//            UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
-//            calendarServiceClient.createPersonalCalendar(requestDto);
+            UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
+            calendarServiceClient.createPersonalCalendar(requestDto);
 
             //저장 후에는 인증번호 삭제
             certificationRepository.deleteByEmail(email);

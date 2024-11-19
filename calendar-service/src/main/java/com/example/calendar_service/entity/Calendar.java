@@ -33,4 +33,10 @@ public class Calendar {
         this.teamId = null;
     }
 
+    //팀 캘린더 요청시 사용
+    public Calendar(Long teamId, boolean isTeamCalendar) {
+        this.userId = null;
+        this.teamId = teamId;
+    }
+
 }
