@@ -1,13 +1,6 @@
 server:
   port: 8000
 
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-
 spring:
   application:
     name: gateway-service
@@ -15,59 +8,31 @@ spring:
     gateway:
       routes:
         - id: aiservice
-          uri: lb://AI-SERVICE
+          uri: http://aiservice.spring-boot-app.svc.cluster.local:8082
           predicates:
             - Path=/aiservice/**
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
-            - name: JwtAuthenticationFilter #필터 적용
-#
-#        - id: userservice-filter
-#          uri: lb://USER-SERVICE
-#          predicates:
-#            - Path=/userservice/user/**
-#          filters:
-#            - RewritePath=/userservice/user/(?<segment>.*), /user/$\{segment}
-#            - name: JwtAuthenticationFilter
-#              args:
-#                order: -1
-
 
         - id: userservice
-          uri: lb://USER-SERVICE
+          uri: http://userservice.spring-boot-app.svc.cluster.local:8080
           predicates:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
 
         - id: teamservice
-          uri: lb://TEAM-SERVICE
+          uri: http://teamservice.spring-boot-app.svc.cluster.local:8081
           predicates:
             - Path=/teamservice/**
           filters:
             - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
 
-
-
-      # Global CORS 설정
-      globalcors:
-        corsConfigurations:
-          '[/**]':  # 모든 경로에 대해 CORS 설정 적용
-            allowedOrigins:
-              - "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowed-headers:
-              - "*"
-            allowCredentials: true  # 인증 정보 포함
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
 logging:
   level:
     org.springframework: DEBUG
 
-secret-key: "ThisStatementIsJwtSecretKeyDoNotUseThisStatement"
+secret- key: "ThisStatementIsJwtSecretKeyDoNotUseThisStatement"
