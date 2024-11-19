@@ -14,25 +14,34 @@ import java.time.LocalDateTime;
 public class TeamMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long teamMemberId;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    // 역할을 Enum으로 선언
+    @Enumerated(EnumType.STRING) // Enum을 String으로 저장
+    @Column(nullable = false)
+    private Role role;
+
+    @Column(name = "joined_at", nullable = false)
+    private LocalDateTime joinedAt;
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 
-    @Column(name = "user_id", nullable = false)
-    private Long user_id;
-
-    @Column(nullable = false)
-    private String role;
-
-    @Column(name = "joined_at", nullable = false)
-    private LocalDateTime joined_at;
-
-    public TeamMember(Team team, Long user_id, String role, LocalDateTime joined_at) {
+    public TeamMember(Team team, Long userId, Role role, LocalDateTime joinedAt) {
         this.team = team;
-        this.user_id = user_id;
+        this.userId = userId;
         this.role = role;
-        this.joined_at = joined_at;
+        this.joinedAt = joinedAt;
+    }
+
+    // Enum 정의
+    public enum Role {
+        MASTER, //팀 생성자
+        ADMIN,  // 관리자
+        MEMBER  // 일반 멤버
     }
 }
