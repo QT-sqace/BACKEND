@@ -11,4 +11,8 @@ public interface UserServiceClient {
     //유저서비스를 통해서 유저 정보 가져옴
     @GetMapping("/basic/{user_id}")
     BasicInfoDto getUserBasicInfo(@PathVariable("user_id") Long userId);
+
+    //팀 리스트 조회에서 유저 이미지 조회
+    @GetMapping("/profile/{userId}")
+    String getUserProfile(@PathVariable("userId") Long userId);
 }

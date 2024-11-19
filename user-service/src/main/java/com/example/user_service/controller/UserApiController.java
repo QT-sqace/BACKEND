@@ -5,6 +5,7 @@ import com.example.user_service.entity.User;
 import com.example.user_service.entity.UserInfo;
 import com.example.user_service.repository.UserInfoRepository;
 import com.example.user_service.repository.UserRepository;
+import com.example.user_service.service.UserClientService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class UserApiController {
     //이메일, 유저이름 반환하는 FeignClient 예시
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
+    private final UserClientService userService;
 
     @GetMapping("/basic/{userId}")
     public ResponseEntity<BasicInfoDto> getUserBasicInfo(@PathVariable Long userId) {
@@ -45,4 +47,10 @@ public class UserApiController {
         return ResponseEntity.ok(basicInfoDto);
     }
 
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<String> getUserProfile(@PathVariable Long userId) {
+        String profileImage = userService.getProfileImage(userId);
+        return ResponseEntity.ok(profileImage);
+
+    }
 }
