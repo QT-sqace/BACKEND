@@ -1,6 +1,8 @@
 package com.example.team_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,9 +11,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
 
-    public void sendEmail(String toEmail, String inviteLink) {
+    /**
+     * 간단한 텍스트 이메일 발송
+     *
+     * @param toEmail    수신자 이메일
+     * @param inviteLink 초대 링크
+     */
+    public void sendTextEmail(String toEmail, String inviteLink) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("팀에 초대되었습니다!");
@@ -19,11 +28,9 @@ public class EmailService {
 
         try {
             mailSender.send(message);
+            logger.info("텍스트 이메일 발송 성공: {}", toEmail);
         } catch (Exception e) {
-            // 로그 기록 또는 실패 처리
-            System.out.println("이메일 발송 실패: " + e.getMessage());
+            logger.error("텍스트 이메일 발송 실패: {}", e.getMessage());
         }
-
     }
-
 }

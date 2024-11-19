@@ -68,7 +68,7 @@ public class TeamService {
 
             //추후에 배포할때는 https://yourdomain.com/invite/{inviteToken} 여기로 수정
             String inviteLink = "http://localhost:3000/invite/" + inviteToken;
-            emailService.sendEmail(email, inviteLink);
+            emailService.sendTextEmail(email, inviteLink);
             log.info("보낸 이메일: {}, 초대 링크: {}", email, inviteLink);
         }
         log.info("팀 초대 완료: {}" , request.getProjectName());
