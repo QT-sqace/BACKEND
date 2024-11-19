@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class TeamListResponseDto {
+    private Long teamId;                //팀 ID
     private String teamName;            //팀 이름
     private String teamImage;           //팀 이미지 경로
     private int memberCount;            //팀 전체 인원수

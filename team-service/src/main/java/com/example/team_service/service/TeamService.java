@@ -141,6 +141,7 @@ public class TeamService {
                             .toList();
 
                     return new TeamListResponseDto(
+                            team.getTeamId(),
                             team.getProjectName(),
                             team.getProjectImage(),
                             team.getMembers().size(),
