@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class TeamService {
     private final EmailService emailService;
     private final CalendarServiceClient calendarServiceClient;
     private final UserServiceClient userServiceClient;
+    private final ExecutorService executorService;  //비동기 처리용
 
 
     // 팀 생성, 추후에 팀 로고 이미지를 MinIo 경로로 등록하는 로직 필요
@@ -123,6 +125,7 @@ public class TeamService {
 
         log.info("회원번호: {} 성공적으로 팀에 가입 팀명: {}  ", userId, team.getProjectName());
 
+        executorService.submit(() -> syncTeamEventAsync(team.getTeamId(), userId));
     }
 
     //팀리스트 반환
@@ -152,5 +155,19 @@ public class TeamService {
                 .toList();
 
         return teamList;
+    }
+
+    /**
+     * 팀에 가입시점에 최초 한번만 호출
+     * 비동기 동기화로 추후에 팀에 가입한 회원도 개인 캘린더에 팀 일정 가져오기
+     */
+    private void syncTeamEventAsync(Long teamId, Long userId) {
+        try {
+            log.info("팀 일정 동기화 시작 - teamId: {}, userId: {}", teamId, userId);
+            calendarServiceClient.syncTeamEventsToPersonalCalendar(teamId, userId);
+            log.info("팀 일정 동기화 완료 - teamId: {}, userId: {}", teamId, userId);
+        } catch (Exception e) {
+            log.error("팀 일정 동기화 실패 - teamId: {}, userId: {}", teamId, userId, e);
+        }
     }
 }

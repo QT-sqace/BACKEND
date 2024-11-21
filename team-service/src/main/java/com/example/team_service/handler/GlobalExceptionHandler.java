@@ -17,6 +17,13 @@ public class GlobalExceptionHandler {
                 .body(BasicResponseDto.failure(ex.getMessage(), null));
     }
 
+    // IllegalStateException 처리
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<BasicResponseDto> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN) // 403 Forbidden 상태 반환
+                .body(BasicResponseDto.failure(ex.getMessage(), null)); // 예외 메시지 반환
+    }
+
     // NullPointerException 처리
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<BasicResponseDto> handleNullPointerException(NullPointerException ex) {
