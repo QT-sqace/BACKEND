@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/files")
@@ -47,14 +49,37 @@ public class FileController {
     @GetMapping("/download/{fileId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
         try {
+            // 파일 리소스 가져오기
             Resource resource = fileService.downloadFile(fileId);
 
-            // 파일 이름 추출
+            // 파일 이름 및 확장자 추출
             String fileName = resource.getFilename();
+            if (fileName == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+            // 확장자에 따른 Content-Type 설정
+            String contentType;
+            switch (fileExtension) {
+                case "jpg":
+                case "jpeg":
+                    contentType = "image/jpeg";
+                    break;
+                case "png":
+                    contentType = "image/png";
+                    break;
+                case "pdf":
+                    contentType = "application/pdf";
+                    break;
+                default:
+                    contentType = "application/octet-stream"; // 기본값
+            }
 
             // 응답 헤더 설정
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
                     .body(resource);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
