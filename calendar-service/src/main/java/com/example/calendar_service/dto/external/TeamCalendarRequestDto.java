@@ -1,4 +1,4 @@
-package com.example.calendar_service.dto.team;
+package com.example.calendar_service.dto.external;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
