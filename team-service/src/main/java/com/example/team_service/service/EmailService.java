@@ -16,6 +16,14 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("팀에 초대되었습니다!");
         message.setText("다음 링크를 클릭하여 팀에 가입하세요: " + inviteLink);
-        mailSender.send(message);
+
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            // 로그 기록 또는 실패 처리
+            System.out.println("이메일 발송 실패: " + e.getMessage());
+        }
+
     }
+
 }
