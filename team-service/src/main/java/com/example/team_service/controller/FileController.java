@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,67 +24,86 @@ public class FileController {
 
     // 파일 업로드
     @PostMapping("/upload")
-    public ResponseEntity<File> uploadFile(@RequestParam("file") MultipartFile file,
-                                           @RequestParam("teamId") Long teamId,
-                                           @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files,
+                                         @RequestParam("teamId") Long teamId,
+                                         @RequestHeader("Authorization") String token)
+
+    {  System.out.println("uploadFiles API called");
+
         try {
-            Long userId = jwtUtil.extractedUserIdFromHeader(token); // 토큰에서 사용자 ID 추출
-            File uploadedFile = fileService.uploadFile(file, teamId, userId);
-            return ResponseEntity.ok(uploadedFile);
+            Long userId = jwtUtil.extractedUserIdFromHeader(token);
+            List<File> uploadedFiles = fileService.uploadFiles(files, teamId, userId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "파일 업로드 완료");
+            response.put("files", uploadedFiles);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "fail");
+            response.put("message", "파일 업로드 실패: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
     // 파일 삭제
-    @DeleteMapping("/delete/{fileId}")
-    public ResponseEntity<String> deleteFile(@PathVariable Long fileId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteFiles(@RequestBody List<Long> fileIds) {
         try {
-            fileService.deleteFile(fileId);
-            return ResponseEntity.ok("파일 삭제 완료");
+            fileService.deleteFiles(fileIds);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "파일 삭제 완료");
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("파일 삭제 실패: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "fail");
+            response.put("message", "파일 삭제 실패: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
     // 파일 다운로드
-    @GetMapping("/download/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
+    @PostMapping("/download")
+    public ResponseEntity<?> downloadFiles(@RequestBody List<Long> fileIds) {
         try {
-            // 파일 리소스 가져오기
-            Resource resource = fileService.downloadFile(fileId);
+            List<Resource> resources = fileService.downloadFiles(fileIds);
 
-            // 파일 이름 및 확장자 추출
-            String fileName = resource.getFilename();
-            if (fileName == null) {
-                return ResponseEntity.badRequest().body(null);
-            }
-            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "파일 다운로드 성공");
+            response.put("resources", resources);
 
-            // 확장자에 따른 Content-Type 설정
-            String contentType;
-            switch (fileExtension) {
-                case "jpg":
-                case "jpeg":
-                    contentType = "image/jpeg";
-                    break;
-                case "png":
-                    contentType = "image/png";
-                    break;
-                case "pdf":
-                    contentType = "application/pdf";
-                    break;
-                default:
-                    contentType = "application/octet-stream"; // 기본값
-            }
-
-            // 응답 헤더 설정
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .header(HttpHeaders.CONTENT_TYPE, contentType)
-                    .body(resource);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "fail");
+            response.put("message", "파일 다운로드 실패: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
         }
     }
+
+    // 파일 조회 API - 팀 ID로 파일 목록 조회
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> listFiles(@PathVariable Long teamId) {
+        try {
+            List<File> files = fileService.getFilesByTeamId(teamId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("files", files);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "fail");
+            response.put("message", "파일 조회 실패: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 }
