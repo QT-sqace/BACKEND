@@ -4,6 +4,7 @@ pipeline {
         CI = 'false'
         DOCKER_IMAGE = 'hajewoong/qt-sqace-backend'
         PATH = "$JAVA_HOME/bin:$PATH"
+        JAVA_HOME="/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.0.1.el8.x86_64"
         
     }
     stages {
@@ -11,6 +12,7 @@ pipeline {
             steps {
                 sh '''
                 cd gateway
+                ./gradlew clean
                 ./gradlew test
                 '''
             }
