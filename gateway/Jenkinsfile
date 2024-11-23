@@ -13,7 +13,7 @@ pipeline {
                 sh '''
                 cd gateway
                 ./gradlew clean
-                ./gradlew test
+                ./gradlew :test
                 '''
             }
         }
