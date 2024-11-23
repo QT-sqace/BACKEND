@@ -9,6 +9,7 @@ pipeline {
             steps {
                 sh '''
                 cd gateway
+                echo $JAVA_HOME
                 ./gradlew test
                 '''
             }
