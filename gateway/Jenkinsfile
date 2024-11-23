@@ -11,6 +11,7 @@ pipeline {
             steps {
                 sh '''
                 cd gateway
+                java --version
                 ./gradlew clean build
                 ./gradlew test
                 '''
