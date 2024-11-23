@@ -1,1 +1,10 @@
-
+pipeline {
+    agent any
+    stages {
+        stage('Webhook Test') {
+            steps {
+                echo "Webhook triggered successfully! Branch: ${env.BRANCH_NAME}"
+            }
+        }
+    }
+}
