@@ -3,6 +3,7 @@ pipeline {
     environment {
         CI = 'false'
         DOCKER_IMAGE = 'hajewoong/qt-sqace-backend'
+        PATH = "$JAVA_HOME/bin:$PATH"
     }
     stages {
         stage('test gateway') {
