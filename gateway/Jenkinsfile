@@ -10,6 +10,7 @@ pipeline {
                 sh '''
                 cd gateway
                 echo $JAVA_HOME
+                ./gradlew clean
                 ./gradlew test
                 '''
             }
