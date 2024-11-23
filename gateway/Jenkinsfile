@@ -13,6 +13,7 @@ pipeline {
                 cd gateway
                 echo $JAVA_HOME
                 echo $PATH
+                ./gradlew clean build
                 ./gradlew test
                 '''
             }
