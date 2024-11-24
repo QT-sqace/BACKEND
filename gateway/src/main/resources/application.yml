@@ -1,13 +1,5 @@
 server:
   port: 8000
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-
 spring:
   application:
     name: gateway-service
@@ -50,7 +42,7 @@ spring:
         corsConfigurations:
           '[/**]':  # 모든 경로에 대해 CORS 설정 적용
             allowedOrigins:
-              - "http://localhost:3000"
+              - "http://sqace.site/"
             allowedMethods:
               - GET
               - POST
