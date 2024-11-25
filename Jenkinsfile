@@ -6,7 +6,7 @@ node {
         }
     } else if (branchName == 'team-service') {
         checkout scm
-        sh 'ls'
+        sh 'ls team-service'
     } else {
         echo "No specific Jenkinsfile for this branch"
     }
