@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'Built-In-Node' }  // built-in-node 노드에서 작업을 실행
+    agent { label 'default' }  // built-in-node 노드에서 작업을 실행
     stages {
         stage('Checkout') {
             steps {
