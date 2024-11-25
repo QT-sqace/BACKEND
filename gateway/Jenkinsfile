@@ -1,5 +1,5 @@
 pipeline{
-    agent none
+    agent any
     stage('Test Gateway') {
         steps {
             sh './gradlew :test'  // gateway 프로젝트에서 테스트 실행
