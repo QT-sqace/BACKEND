@@ -1,5 +1,5 @@
 pipeline {
-    agent any  // 파이프라인 전체에서 기본 에이전트를 사용하지 않음
+    agent none  // 파이프라인 전체에서 기본 에이전트를 사용하지 않음
     stages {
         stage('Checkout') {
             steps {
