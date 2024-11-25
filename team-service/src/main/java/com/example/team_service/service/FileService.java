@@ -3,17 +3,19 @@ package com.example.team_service.service;
 import com.example.team_service.entity.File;
 import com.example.team_service.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -30,22 +32,32 @@ public class FileService {
         }
 
         List<File> uploadedFiles = new ArrayList<>();
-
         for (MultipartFile file : files) {
-            String filePath = uploadDir + file.getOriginalFilename();
+            try {
+                String filePath = uploadDir + file.getOriginalFilename();
 
-            // 파일 저장
-            Files.copy(file.getInputStream(), Paths.get(filePath));
+                // 파일 저장
+                Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
 
-            // 파일 엔티티 생성 및 데이터베이스 저장
-            File fileEntity = new File();
-            fileEntity.setFileName(file.getOriginalFilename());
-            fileEntity.setFilePath(filePath);
-            fileEntity.setFileSize((int) file.getSize());
-            fileEntity.setUploadedBy(userId);
-            fileEntity.setTeamId(teamId);
-            fileEntity.setUploadDate(LocalDateTime.now());
-            uploadedFiles.add(fileRepository.save(fileEntity)); // DB 저장
+                // 파일 엔티티 생성 및 데이터베이스 저장
+                File fileEntity = new File();
+                fileEntity.setFileName(file.getOriginalFilename());
+                fileEntity.setFilePath(filePath);
+                fileEntity.setFileSize((int) file.getSize());
+                fileEntity.setUploadedBy(userId);
+                fileEntity.setTeamId(teamId);
+                fileEntity.setUploadDate(LocalDateTime.now());
+
+                uploadedFiles.add(fileRepository.save(fileEntity)); // DB 저장
+
+                System.out.println("파일 업로드 성공: " + filePath);
+            } catch (Exception e) {
+                System.err.println("파일 업로드 중 오류 발생: " + e.getMessage());
+            }
+        }
+
+        if (uploadedFiles.isEmpty()) {
+            throw new IllegalArgumentException("업로드된 파일이 없습니다.");
         }
 
         return uploadedFiles;
@@ -54,15 +66,21 @@ public class FileService {
     // 파일 삭제 (단일/다중 지원)
     public void deleteFiles(List<Long> fileIds) throws Exception {
         for (Long fileId : fileIds) {
-            File fileEntity = fileRepository.findById(fileId)
-                    .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다: " + fileId));
+            try {
+                File fileEntity = fileRepository.findById(fileId)
+                        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다: " + fileId));
 
-            // 실제 파일 삭제
-            Path filePath = Paths.get(fileEntity.getFilePath());
-            Files.deleteIfExists(filePath);
+                // 실제 파일 삭제
+                Path filePath = Paths.get(fileEntity.getFilePath());
+                Files.deleteIfExists(filePath);
 
-            // 데이터베이스에서 엔티티 삭제
-            fileRepository.delete(fileEntity);
+                // 데이터베이스에서 엔티티 삭제
+                fileRepository.delete(fileEntity);
+
+                System.out.println("파일 삭제 성공: " + filePath);
+            } catch (Exception e) {
+                System.err.println("파일 삭제 중 오류 발생 (fileId: " + fileId + "): " + e.getMessage());
+            }
         }
     }
 
@@ -71,18 +89,62 @@ public class FileService {
         List<Resource> resources = new ArrayList<>();
 
         for (Long fileId : fileIds) {
-            File fileEntity = fileRepository.findById(fileId)
-                    .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다: " + fileId));
+            try {
+                // 파일 정보 조회
+                File fileEntity = fileRepository.findById(fileId)
+                        .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다: " + fileId));
 
-            Path filePath = Paths.get(fileEntity.getFilePath());
-            if (!Files.exists(filePath)) {
-                throw new IllegalArgumentException("파일 경로가 유효하지 않습니다: " + fileId);
+                // 파일 경로 생성
+                Path filePath = Paths.get(fileEntity.getFilePath());
+                System.out.println("확인 중인 파일 경로: " + filePath);
+
+                // 파일 존재 여부 확인
+                if (!Files.exists(filePath)) {
+                    throw new IllegalArgumentException("파일 경로가 유효하지 않습니다: " + filePath);
+                }
+
+                // Resource 객체 생성 및 추가
+                UrlResource resource = new UrlResource(filePath.toUri());
+                if (!resource.exists() || !resource.isReadable()) {
+                    throw new IllegalArgumentException("파일이 읽기 불가능합니다: " + filePath);
+                }
+
+                resources.add(resource);
+                System.out.println("파일 다운로드 성공: " + filePath);
+            } catch (Exception e) {
+                System.err.println("파일 다운로드 중 오류 발생 (fileId: " + fileId + "): " + e.getMessage());
             }
+        }
 
-            resources.add(new UrlResource(filePath.toUri()));
+        if (resources.isEmpty()) {
+            throw new IllegalArgumentException("유효한 파일이 없습니다.");
         }
 
         return resources;
+    }
+
+    // 다중 파일 ZIP 생성
+    public Resource createZipFile(List<Resource> resources) throws Exception {
+        String zipFileName = "uploads/files.zip";
+        Path zipPath = Paths.get(zipFileName);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+            for (Resource resource : resources) {
+                try (InputStream is = resource.getInputStream()) {
+                    ZipEntry entry = new ZipEntry(resource.getFilename());
+                    zos.putNextEntry(entry);
+                    is.transferTo(zos);
+                    zos.closeEntry();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("ZIP 파일 생성 중 오류 발생: " + e.getMessage());
+            throw e;
+        }
+
+        System.out.println("ZIP 파일 생성 성공: " + zipPath);
+        return new UrlResource(zipPath.toUri());
     }
 
     // 특정 팀 ID로 파일 조회
