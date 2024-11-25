@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +28,7 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files,
                                          @RequestParam("teamId") Long teamId,
-                                         @RequestHeader("Authorization") String token)
-
-    {  System.out.println("uploadFiles API called");
-
+                                         @RequestHeader("Authorization") String token) {
         try {
             Long userId = jwtUtil.extractedUserIdFromHeader(token);
             List<File> uploadedFiles = fileService.uploadFiles(files, teamId, userId);
@@ -39,11 +38,14 @@ public class FileController {
             response.put("message", "파일 업로드 완료");
             response.put("files", uploadedFiles);
 
+            logResponse(response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", "fail");
             response.put("message", "파일 업로드 실패: " + e.getMessage());
+
+            logResponse(response);
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -58,33 +60,14 @@ public class FileController {
             response.put("status", "success");
             response.put("message", "파일 삭제 완료");
 
+            logResponse(response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", "fail");
             response.put("message", "파일 삭제 실패: " + e.getMessage());
 
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
-
-    // 파일 다운로드
-    @PostMapping("/download")
-    public ResponseEntity<?> downloadFiles(@RequestBody List<Long> fileIds) {
-        try {
-            List<Resource> resources = fileService.downloadFiles(fileIds);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "파일 다운로드 성공");
-            response.put("resources", resources);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "fail");
-            response.put("message", "파일 다운로드 실패: " + e.getMessage());
-
+            logResponse(response);
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -94,16 +77,75 @@ public class FileController {
     public ResponseEntity<?> listFiles(@PathVariable Long teamId) {
         try {
             List<File> files = fileService.getFilesByTeamId(teamId);
+
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
+            response.put("message", "파일 조회 완료");
             response.put("files", files);
+
+            logResponse(response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", "fail");
             response.put("message", "파일 조회 실패: " + e.getMessage());
+
+            logResponse(response);
             return ResponseEntity.badRequest().body(response);
         }
     }
 
+    // 파일 다운로드 (단일/다중 지원)
+    @PostMapping("/download")
+    public ResponseEntity<?> downloadFiles(@RequestBody List<Long> fileIds) {
+        try {
+            List<Resource> resources = fileService.downloadFiles(fileIds);
+
+            if (resources.isEmpty()) {
+                throw new IllegalArgumentException("유효한 파일이 없습니다.");
+            }
+
+            if (resources.size() == 1) {
+                // 단일 파일 처리
+                Resource singleFile = resources.get(0);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("message", "단일 파일 다운로드 성공");
+                response.put("file", singleFile.getFilename());
+
+                logResponse(response);
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + singleFile.getFilename() + "\"")
+                        .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Paths.get(singleFile.getURI())))
+                        .body(singleFile);
+            } else {
+                // 다중 파일 처리: ZIP으로 압축
+                Resource zipFile = fileService.createZipFile(resources);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("message", "다중 파일 다운로드 성공 (ZIP)");
+                response.put("file", "files.zip");
+
+                logResponse(response);
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"files.zip\"")
+                        .header(HttpHeaders.CONTENT_TYPE, "application/zip")
+                        .body(zipFile);
+            }
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "fail");
+            response.put("message", "파일 다운로드 실패: " + e.getMessage());
+
+            logResponse(response);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // 로그 출력 메서드 (JSON 형식)
+    private void logResponse(Map<String, Object> response) {
+        System.out.println("응답 로그: " + response);
+    }
 }
