@@ -1,29 +1,35 @@
-pipeline{
-    agent any
-    stage('Test Gateway') {
-        steps {
-            sh './gradlew :test'  // gateway 프로젝트에서 테스트 실행
-        }
-    }
+// path/to/gateway/Jenkinsfile
+def runGatewayPipeline() {
+    pipeline {
+        agent any
+        stages {
+            stage('Test Gateway') {
+                steps {
+                    sh './gradlew :test'  // gateway 프로젝트에서 테스트 실행
+                }
+            }
 
-    stage('Build Docker Image') {
-        steps {
-            sh "docker build -t ${DOCKER_IMAGE}-gateway:latest ."  // gateway Docker 이미지 빌드
-        }
-    }
+            stage('Build Docker Image') {
+                steps {
+                    sh "docker build -t ${DOCKER_IMAGE}-gateway:latest ."  // gateway Docker 이미지 빌드
+                }
+            }
 
-    stage('Push Docker Image') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                sh "docker push ${DOCKER_IMAGE}-gateway:latest"  // Docker Hub에 이미지 푸시
+            stage('Push Docker Image') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                        sh "docker push ${DOCKER_IMAGE}-gateway:latest"  // Docker Hub에 이미지 푸시
+                    }
+                }
+            }
+
+            stage('Deploy to Kubernetes') {
+                steps {
+                    sh 'kubectl apply -f gateway/src/main/k8s/k8s.yaml'  // Kubernetes에 배포
+                }
             }
         }
     }
-
-    stage('Deploy to Kubernetes') {
-        steps {
-            sh 'kubectl apply -f gateway/src/main/k8s/k8s.yaml'  // Kubernetes에 배포
-        }
-    }
 }
+return this
