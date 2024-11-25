@@ -5,7 +5,6 @@ pipeline {
         DOCKER_IMAGE = 'hajewoong/qt-sqace-backend'
         PATH = "$PATH:$HOME/bin"
         JAVA_HOME="/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.0.1.el8.x86_64"
-        
     }
     stages {
         stage('test gateway') {
@@ -16,31 +15,31 @@ pipeline {
                 '''
             }
         }
-        stage('build docker image'){
-            steps{
+        stage('build docker image') {
+            steps {
                 sh '''
                 cd gateway
                 docker build -t ${DOCKER_IMAGE}-gateway:latest .
                 '''
             }
         }
-        stage('Push Docker Image'){
-            steps{
+        stage('Push Docker Image') {
+            steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
                     sh 'docker push ${DOCKER_IMAGE}-gateway:latest'
                 }
             }
         }
-        stage('deploy'){
-            steps{
+        stage('deploy') {
+            steps {
                 sh 'kubectl apply -f gateway/src/main/k8s/k8s.yaml'
             }
         }
     }
-    post{
-        always{
+    post {
+        always {
             sh 'docker rmi -f $(docker images -q)'
-        }   
+        }
     }
 }
