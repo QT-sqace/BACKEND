@@ -1,13 +1,14 @@
 package com.example.gateway;
 
-import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class GatewayApplicationTests {
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-    @Test
-    void contextLoads() {
-    }
+@SpringBootTest
+@AutoConfigureMockMvc
+class GatewayApplicationTests {
 
 }
