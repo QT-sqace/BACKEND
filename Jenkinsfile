@@ -6,6 +6,7 @@ node {
         }
     } else if (branchName == 'team-service') {
         dir('team-service') {
+            sh 'ls'
             load 'team-service/Jenkinsfile'
         }
     } else {
