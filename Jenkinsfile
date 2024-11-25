@@ -8,6 +8,10 @@ node {
     } else if (branchName == 'team-service') {
         checkout scm
         dir('team-service') {
+            load 'Jenkinsfile'
+        }
+    } else {
+        dir('team-service') {
             echo 'ls team-service'
             load 'team-service/Jenkinsfile'
         }
