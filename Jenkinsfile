@@ -9,6 +9,7 @@ node {
             load 'Jenkinsfile'
         }
     } else {
+
         echo "No specific Jenkinsfile for this branch"
     }
 }
