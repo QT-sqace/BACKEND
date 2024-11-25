@@ -13,11 +13,11 @@ pipeline {
                     def branchName = env.BRANCH_NAME
                     if (branchName == 'gateway') {
                         dir('gateway') {
-                            load 'Jenkinsfile'  // gateway 디렉토리 내의 Jenkinsfile 로드
+                            load 'gateway/Jenkinsfile'  // gateway 디렉토리 내의 Jenkinsfile 로드
                         }
                     } else if (branchName == 'team-service') {
                         dir('team-service') {
-                            load 'Jenkinsfile'  // team-service 디렉토리 내의 Jenkinsfile 로드
+                            load 'team-service/Jenkinsfile'  // team-service 디렉토리 내의 Jenkinsfile 로드
                         }
                     } else {
                         echo "No specific Jenkinsfile for this branch"
