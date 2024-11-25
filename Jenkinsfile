@@ -5,12 +5,9 @@ node {
             load 'Jenkinsfile'
         }
     } else if (branchName == 'team-service') {
-        dir('team-service') {
-            echo 'ls'
-            load 'team-service/Jenkinsfile'
-        }
+        checkout scm
+        sh 'ls'
     } else {
-
         echo "No specific Jenkinsfile for this branch"
     }
 }
