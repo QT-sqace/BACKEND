@@ -6,7 +6,7 @@ node {
         JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.0.1.el8.x86_64"
     }
     stage('Checkout') {
-        steps {
+        step {
             script {
                 def branchName = env.BRANCH_NAME
                 if (branchName == 'gateway') {
