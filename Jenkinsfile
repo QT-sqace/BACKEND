@@ -8,7 +8,7 @@ node {
     } else if (branchName == 'team-service') {
         checkout scm
         dir('team-service') {
-            load 'Jenkinsfile'
+            load 'team-service/Jenkinsfile'
         }
     } else if (branchName == 'user-service'){
         checkout scm
