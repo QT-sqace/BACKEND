@@ -1,7 +1,6 @@
 // path/to/gateway/Jenkinsfile
 def runGatewayPipeline() {
     pipeline {
-        agent any
         stages {
             stage('Test Gateway') {
                 steps {
