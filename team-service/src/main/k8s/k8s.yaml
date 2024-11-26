@@ -30,7 +30,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway
+  name: team-service
   namespace: spring-boot-app
 spec:
   type: ClusterIP
