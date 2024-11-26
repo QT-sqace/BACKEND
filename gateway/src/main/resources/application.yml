@@ -22,7 +22,7 @@ spring:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
 
         - id: teamservice
-          uri: lb://TEAM-SERVICE
+          uri: http://team-service.spring-boot-app.svc.cluster.local:8081
           predicates:
             - Path=/teamservice/**
           filters:
