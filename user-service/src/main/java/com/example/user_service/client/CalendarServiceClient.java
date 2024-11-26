@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "calendar-service-client", url = "http://localhost:8000/calendarservice")
+@FeignClient(name = "calendar-service-client", url = "http://gateway.spring-boot-app.svc.cluster.local/calendarservice")
 public interface CalendarServiceClient {
 
     @PostMapping("/create/personal")
