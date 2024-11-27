@@ -49,7 +49,7 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
-            allowed-headers:
+            allowedHeaders:
               - "*"
             allowCredentials: true  # 인증 정보 포함
       default-filters:
