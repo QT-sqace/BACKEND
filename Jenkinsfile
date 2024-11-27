@@ -1,6 +1,7 @@
 node {
     def branchName = env.BRANCH_NAME
     if (branchName == 'gateway') {
+        checkout scm
         dir('gateway') {
             load 'Jenkinsfile'
         }
