@@ -42,7 +42,7 @@ spring:
         corsConfigurations:
           '[/**]':  # 모든 경로에 대해 CORS 설정 적용
             allowedOrigins:
-              - "http://sqace.site/"
+              - "http://sqace.site"
             allowedMethods:
               - GET
               - POST

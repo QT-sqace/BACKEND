@@ -33,7 +33,7 @@ pipeline {
         }
         stage('deploy') {
             steps {
-                sh 'kubectl apply -f gateway/src/main/k8s/k8s.yaml'
+                sh 'kubectl rollout restart deployment/gateway -n spring-boot-app '
             }
         }
     }
