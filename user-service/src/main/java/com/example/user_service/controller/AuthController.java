@@ -42,6 +42,7 @@ public class AuthController {
     public ResponseEntity<? super EmailCertificationResponseDto> emailCertification(
             @RequestBody @Valid EmailCertificationRequestDto requestBody
     ) {
+        log.info("call emailCertification");
         ResponseEntity<? super EmailCertificationResponseDto> response = authService.emailCertification(requestBody);
         return response;
     }
