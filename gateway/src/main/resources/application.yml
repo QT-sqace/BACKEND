@@ -15,9 +15,7 @@ spring:
             - name: JwtAuthenticationFilter #필터 적용
 
         - id: userservice
-#          uri: http://user-service.spring-boot-app.svc.cluster.local:8080
-          ##테스트용
-          uri: lb://USER-SERVICE
+          uri: http://user-service.spring-boot-app.svc.cluster.local:8080
           predicates:
             - Path=/userservice/**
           filters:
