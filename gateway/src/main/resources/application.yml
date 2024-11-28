@@ -20,6 +20,7 @@ spring:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
+            - AddRequestHeader=Origin, http://sqace.site
 
         - id: teamservice
           uri: http://team-service.spring-boot-app.svc.cluster.local:8081
