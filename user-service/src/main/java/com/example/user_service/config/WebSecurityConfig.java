@@ -77,7 +77,7 @@ public class WebSecurityConfig {
         corsConfiguration.addAllowedOrigin("http://sqace.site"); // 프론트엔드 출처 명시
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
-//        corsConfiguration.setAllowCredentials(true); // 인증 정보 포함 허용
+        corsConfiguration.setAllowCredentials(true); // 인증 정보 포함 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
