@@ -51,7 +51,7 @@ spring:
               - OPTIONS
             allowedHeaders:
               - "*"
-            allowCredentials: true  # 인증 정보 포함
+#            allowCredentials: true  # 인증 정보 포함
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 logging:
