@@ -58,7 +58,7 @@ public class NoticeController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getNoticeById(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ) {
         try {
             jwtUtil.extractedUserIdFromHeader(token); // 사용자 검증
@@ -81,7 +81,7 @@ public class NoticeController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateNotice(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody NoticeUpdateRequestDto request
     ) {
         try {
@@ -114,7 +114,7 @@ public class NoticeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotice(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ) {
         try {
             Long userId = jwtUtil.extractedUserIdFromHeader(token);
@@ -161,7 +161,7 @@ public class NoticeController {
     @GetMapping("/by-author/{teamMemberId}")
     public ResponseEntity<?> getNoticesByAuthor(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long teamMemberId
+            @PathVariable("teamMemberId") Long teamMemberId
     ) {
         try {
             jwtUtil.extractedUserIdFromHeader(token); // 사용자 검증

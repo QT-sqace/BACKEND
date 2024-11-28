@@ -74,7 +74,7 @@ public class FileController {
 
     // 파일 조회 API - 팀 ID로 파일 목록 조회
     @GetMapping("/team/{teamId}")
-    public ResponseEntity<?> listFiles(@PathVariable Long teamId) {
+    public ResponseEntity<?> listFiles(@PathVariable("teamId") Long teamId) {
         try {
             List<File> files = fileService.getFilesByTeamId(teamId);
 

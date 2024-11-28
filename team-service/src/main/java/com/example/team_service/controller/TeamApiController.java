@@ -25,7 +25,7 @@ public class TeamApiController {
     private final TeamMemberService teamMemberService;
 
     @GetMapping("/members/{teamId}")
-    public ResponseEntity<TeamMemberResponseDto> getTeamMembers(@PathVariable Long teamId) {
+    public ResponseEntity<TeamMemberResponseDto> getTeamMembers(@PathVariable("teamId") Long teamId) {
         log.info("팀 멤버 정보 요청: teamId = {}", teamId);
 
         //팀 멤버 조회

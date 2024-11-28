@@ -100,7 +100,7 @@ public class AuthController {
 
     //카톡 소셜 로그인
     @GetMapping("/auth/social/kakao/{userId}")
-    public ResponseEntity<SignInResponseDto> kakaoLoginCallback(@PathVariable Long userId) {
+    public ResponseEntity<SignInResponseDto> kakaoLoginCallback(@PathVariable("userId") Long userId) {
         log.info("kakaoLoginCallback 호출됨, userId: {}", userId); // 요청 확인 로그
 
         User user = userRepository.findById(userId).orElse(null);
@@ -122,7 +122,7 @@ public class AuthController {
 
     //구글 소셜 로그인
     @GetMapping("/auth/social/google/{userId}")
-    public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable Long userId) {
+    public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable("userId") Long userId) {
 
         log.info("googleLoginCallback 호출됨, userId: {}", userId);
 
