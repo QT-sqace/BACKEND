@@ -20,7 +20,6 @@ spring:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /$\{segment}
-            - AddRequestHeader=Origin, http://sqace.site
 
         - id: teamservice
           uri: http://team-service.spring-boot-app.svc.cluster.local:8081
@@ -58,5 +57,7 @@ spring:
 logging:
   level:
     org.springframework: DEBUG
+    com.example.gateway:
+      config.LoggingFilterConfig: DEBUG
 
 secret-key: "ThisStatementIsJwtSecretKeyDoNotUseThisStatement"
