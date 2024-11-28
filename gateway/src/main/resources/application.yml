@@ -6,41 +6,16 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: aiservice
-          uri: lb://AI-SERVICE
-          predicates:
-            - Path=/aiservice/**
-          filters:
-            - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
-            - name: JwtAuthenticationFilter #필터 적용
-
         - id: userservice
           uri: http://user-service.spring-boot-app.svc.cluster.local:8080
           predicates:
             - Path=/userservice/**
           filters:
-            - RewritePath=/userservice/(?<segment>.*), /$\{segment}
-
-        - id: teamservice
-          uri: http://team-service.spring-boot-app.svc.cluster.local:8081
-          predicates:
-            - Path=/teamservice/**
-          filters:
-            - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
-
-        - id: calendarservice
-          uri: lb://CALENDAR-SERVICE
-          predicates:
-            - Path=/calendarservice/**
-          filters:
-            - RewritePath=/calendarservice/(?<segment>.*), /$\{segment}
-
-
-
+            - RewritePath=/userservice/(?<segment>.*), /${segment}
       # Global CORS 설정
       globalcors:
         corsConfigurations:
-          '[/**]':  # 모든 경로에 대해 CORS 설정 적용
+          '[/**]': # 모든 경로에 대해 CORS 설정 적용
             allowedOrigins:
               - "http://sqace.site"
             allowedMethods:
