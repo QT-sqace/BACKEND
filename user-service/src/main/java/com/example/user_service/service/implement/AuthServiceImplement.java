@@ -68,9 +68,9 @@ public class AuthServiceImplement implements AuthService {
             certificationRepository.deleteByEmail(email);
 
             //새로운 인증번호 저장
+            log.info("save certificationEntity");
             Certification certificationEntity = new Certification(null, email, certificationNumber);
             certificationRepository.save(certificationEntity);
-
         } catch (Exception exception) {
             exception.printStackTrace();
             return ResponseDto.databaseError();
@@ -94,7 +94,6 @@ public class AuthServiceImplement implements AuthService {
             boolean isMatched = certificationEntity.getEmail().equals(email)
                     && certificationEntity.getCertificationNumber().equals(certificationNumber);
             if (!isMatched) return CheckCertificationResponseDto.certificationFail();
-
 
 
         } catch (Exception exception) {
@@ -128,7 +127,7 @@ public class AuthServiceImplement implements AuthService {
 
 //            log.info("user엔티티 확인: "+ userEntity.toString());
             //유저 정보 저장
-            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt,defaultProfileImage);
+            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt, defaultProfileImage);
             userInfoRepository.save(userInfoEntity);
 
             //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
@@ -138,7 +137,7 @@ public class AuthServiceImplement implements AuthService {
             //저장 후에는 인증번호 삭제
             certificationRepository.deleteByEmail(email);
 
-        } catch (Exception exception){
+        } catch (Exception exception) {
             exception.printStackTrace();
             return ResponseDto.databaseError();
 
