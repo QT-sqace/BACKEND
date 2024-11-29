@@ -63,6 +63,7 @@ public class AuthServiceImplement implements AuthService {
             log.info("certificationNumber: {}", certificationNumber);
             log.info("email: {}", email);
             boolean isSuccessed = emailProvider.sendCertificationMail(email, certificationNumber);
+            log.info("isSuccessed: {}", isSuccessed);
             if (!isSuccessed) return EmailCertificationResponseDto.mailSendFail();  //
 
             //기존의 인증번호가 있으면 삭제
