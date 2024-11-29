@@ -9,12 +9,7 @@ node {
         checkout scm
         dir('team-service') {
             echo 'ls'
-            load 'team-service/Jenkinsfile'
-        }
-    } else {
-        dir('team-service') {
-            echo 'ls team-service'
-            load 'team-service/Jenkinsfile'
+            load 'Jenkinsfile'
         }
     } else if (branchName == 'user-service'){
         checkout scm
