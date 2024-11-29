@@ -60,7 +60,8 @@ public class AuthServiceImplement implements AuthService {
             String email = dto.getEmail();
 
             String certificationNumber = CertificationNumber.getCertificationNumber();
-
+            log.info("certificationNumber: {}", certificationNumber);
+            log.info("email: {}", email);
             boolean isSuccessed = emailProvider.sendCertificationMail(email, certificationNumber);
             if (!isSuccessed) return EmailCertificationResponseDto.mailSendFail();  //
 
