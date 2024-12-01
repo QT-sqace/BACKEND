@@ -44,12 +44,13 @@ public class Notice {
     // 생성 시 날짜 자동 설정
     @PrePersist
     protected void onCreate() {
-        this.createdDate = LocalDateTime.now();
+        this.createdDate = LocalDateTime.now().withNano(0); // 밀리초 제거
     }
+
 
     // 수정 시 날짜 자동 업데이트
     @PreUpdate
     protected void onUpdate() {
-        this.updatedDate = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now().withNano(0); // 밀리초 제거
     }
 }

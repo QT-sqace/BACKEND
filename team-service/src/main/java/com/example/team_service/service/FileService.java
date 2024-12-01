@@ -1,9 +1,9 @@
 package com.example.team_service.service;
 
+import com.example.team_service.dto.response.FileDTO;
 import com.example.team_service.entity.File;
 import com.example.team_service.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -24,14 +25,14 @@ public class FileService {
     private final FileRepository fileRepository;
 
     // 파일 업로드 (단일/다중 지원)
-    public List<File> uploadFiles(List<MultipartFile> files, Long teamId, Long userId) throws Exception {
+    public List<FileDTO> uploadFiles(List<MultipartFile> files, Long teamId, Long userId) throws Exception {
         String uploadDir = "uploads/";
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath); // 업로드 폴더가 없으면 생성
+            Files.createDirectories(uploadPath); // 업로드 폴더 생성
         }
 
-        List<File> uploadedFiles = new ArrayList<>();
+        List<FileDTO> uploadedFileDTOs = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
                 String filePath = uploadDir + file.getOriginalFilename();
@@ -48,7 +49,10 @@ public class FileService {
                 fileEntity.setTeamId(teamId);
                 fileEntity.setUploadDate(LocalDateTime.now());
 
-                uploadedFiles.add(fileRepository.save(fileEntity)); // DB 저장
+                File savedFile = fileRepository.save(fileEntity); // DB 저장
+
+                // FileDTO로 변환하여 리스트에 추가
+                uploadedFileDTOs.add(convertToFileDTO(savedFile));
 
                 System.out.println("파일 업로드 성공: " + filePath);
             } catch (Exception e) {
@@ -56,11 +60,11 @@ public class FileService {
             }
         }
 
-        if (uploadedFiles.isEmpty()) {
+        if (uploadedFileDTOs.isEmpty()) {
             throw new IllegalArgumentException("업로드된 파일이 없습니다.");
         }
 
-        return uploadedFiles;
+        return uploadedFileDTOs;
     }
 
     // 파일 삭제 (단일/다중 지원)
@@ -148,7 +152,24 @@ public class FileService {
     }
 
     // 특정 팀 ID로 파일 조회
-    public List<File> getFilesByTeamId(Long teamId) {
-        return fileRepository.findAllByTeamId(teamId);
+    public List<FileDTO> getFilesByTeamId(Long teamId) {
+        List<File> files = fileRepository.findAllByTeamId(teamId);
+
+        return files.stream()
+                .map(this::convertToFileDTO)
+                .collect(Collectors.toList());
+    }
+
+    // File 엔티티를 FileDTO로 변환
+    private FileDTO convertToFileDTO(File file) {
+        return FileDTO.builder()
+                .fileId(file.getFileId())
+                .teamId(file.getTeamId())
+                .fileName(file.getFileName())
+                .filePath(file.getFilePath())
+                .fileSize(file.getFileSize())
+                .uploadedBy(file.getUploadedBy())
+                .uploadDate(file.getUploadDate())
+                .build();
     }
 }

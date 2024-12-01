@@ -1,6 +1,6 @@
 package com.example.team_service.controller;
 
-import com.example.team_service.entity.File;
+import com.example.team_service.dto.response.FileDTO;
 import com.example.team_service.service.FileService;
 import com.example.team_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,9 @@ public class FileController {
                                          @RequestHeader("Authorization") String token) {
         try {
             Long userId = jwtUtil.extractedUserIdFromHeader(token);
-            List<File> uploadedFiles = fileService.uploadFiles(files, teamId, userId);
+
+            // FileDTO 리스트 반환
+            List<FileDTO> uploadedFiles = fileService.uploadFiles(files, teamId, userId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -76,7 +78,8 @@ public class FileController {
     @GetMapping("/team/{teamId}")
     public ResponseEntity<?> listFiles(@PathVariable Long teamId) {
         try {
-            List<File> files = fileService.getFilesByTeamId(teamId);
+            // FileDTO 리스트 반환
+            List<FileDTO> files = fileService.getFilesByTeamId(teamId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -109,12 +112,6 @@ public class FileController {
                 // 단일 파일 처리
                 Resource singleFile = resources.get(0);
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("status", "success");
-                response.put("message", "단일 파일 다운로드 성공");
-                response.put("file", singleFile.getFilename());
-
-                logResponse(response);
                 return ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + singleFile.getFilename() + "\"")
                         .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Paths.get(singleFile.getURI())))
@@ -123,12 +120,6 @@ public class FileController {
                 // 다중 파일 처리: ZIP으로 압축
                 Resource zipFile = fileService.createZipFile(resources);
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("status", "success");
-                response.put("message", "다중 파일 다운로드 성공 (ZIP)");
-                response.put("file", "files.zip");
-
-                logResponse(response);
                 return ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"files.zip\"")
                         .header(HttpHeaders.CONTENT_TYPE, "application/zip")

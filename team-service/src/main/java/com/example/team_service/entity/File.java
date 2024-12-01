@@ -34,5 +34,12 @@ public class File {
 
     @Column(nullable = false)
     private LocalDateTime uploadDate;
+
+    // 밀리초 제거
+    @PrePersist
+    protected void onUpload() {
+        this.uploadDate = LocalDateTime.now().withNano(0); // 밀리초 제거
+    }
+
 }
 
