@@ -15,6 +15,7 @@ public class FileDTO {
     private String filePath;
     private int fileSize;
     private Long uploadedBy;
+    private String userName; // 파일 업로드 사용자 이름
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 날짜 포맷 지정
     private LocalDateTime uploadDate;

@@ -71,7 +71,7 @@ public class TeamService {
             emailService.sendEmail(email, inviteLink);
             log.info("보낸 이메일: {}, 초대 링크: {}", email, inviteLink);
         }
-        log.info("팀 초대 완료: {}" , request.getProjectName());
+        log.info("팀 초대 완료: {}", request.getProjectName());
     }
 
     //InviteToken 검증
@@ -127,15 +127,22 @@ public class TeamService {
 
     //팀리스트 반환
     public List<TeamListResponseDto> getTeamsByUserId(Long userId) {
-        //사용자 가입 팀 목록 조회
-        List<TeamMember> teamMembers = teamMemberRepository.findByUserId(userId);
+        log.info("getTeamsByUserId 호출 - userId: {}", userId);
 
-        //각 팀의 정보를 DTO로 변환
+
+        // 사용자가 가입된 팀 목록 조회
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByUserId(userId);
+        if (teamMembers.isEmpty()) {
+            log.warn("사용자가 가입된 팀이 없습니다. userId: {}", userId);
+            return List.of(); // 빈 리스트 반환
+        }
+
+        // 팀 정보 DTO 변환
         List<TeamListResponseDto> teamList = teamMembers.stream()
                 .map(member -> {
                     Team team = member.getTeam();
 
-                    //각 팀 멤버들의 프로필 이미지 경로 조회
+                    // 각 팀 멤버들의 프로필 이미지 경로 조회
                     List<String> memberImages = team.getMembers().stream()
                             .map(m -> userServiceClient.getUserProfile(m.getUserId()))
                             .toList();
@@ -151,6 +158,7 @@ public class TeamService {
                 })
                 .toList();
 
+        log.info("사용자 ID {}에 대한 팀 목록 반환 완료. 팀 개수: {}", userId, teamList.size());
         return teamList;
     }
 }

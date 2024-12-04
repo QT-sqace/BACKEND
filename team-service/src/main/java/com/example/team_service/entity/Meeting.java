@@ -34,6 +34,9 @@ public class Meeting {
 
     private String meetingUrl; // 미팅 주소 (nullable)
 
+    @Column(name = "user_name")
+    private String userName; // 작성자 이름 (프론트에서 설정)
+
     // 생성자
     public Meeting(Team team, TeamMember createdBy, String meetingName, String meetingUrl) {
         this.team = team;
@@ -48,4 +51,3 @@ public class Meeting {
         this.meetingDate = LocalDateTime.now().withNano(0); // 밀리초 제거
     }
 }
-

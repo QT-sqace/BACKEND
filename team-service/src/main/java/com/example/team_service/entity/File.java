@@ -35,6 +35,9 @@ public class File {
     @Column(nullable = false)
     private LocalDateTime uploadDate;
 
+    @Column(name = "user_name", nullable = true)
+    private String userName; // 업로드 사용자 이름
+
     // 밀리초 제거
     @PrePersist
     protected void onUpload() {

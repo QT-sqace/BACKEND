@@ -29,10 +29,13 @@ public class Notice {
     @JoinColumn(name = "created_by", nullable = false) // TeamMember 테이블의 teamMemberId와 매핑
     private TeamMember createdBy;
 
+    @Column(name = "user_name")
+    private String userName; // 작성자 이름 (프론트에서 설정)
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate; // 작성 날짜
 
-    private LocalDateTime updatedDate; // 수정 날짜 (nullable)
+    private LocalDateTime updatedDate; // 수정 날짜
 
     // 생성자
     public Notice(String title, String content, TeamMember createdBy) {
@@ -46,7 +49,6 @@ public class Notice {
     protected void onCreate() {
         this.createdDate = LocalDateTime.now().withNano(0); // 밀리초 제거
     }
-
 
     // 수정 시 날짜 자동 업데이트
     @PreUpdate
