@@ -26,31 +26,32 @@ public class FileController {
 
     // 파일 업로드
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files,
-                                         @RequestParam("teamId") Long teamId,
+    public ResponseEntity<?> uploadFiles(@RequestParam("teamId") Long teamId,
+                                         @RequestParam("userName") String userName, // user_name 추가
+                                         @RequestParam("files") List<MultipartFile> files,
                                          @RequestHeader("Authorization") String token) {
         try {
-            Long userId = jwtUtil.extractedUserIdFromHeader(token);
+            Long userId = jwtUtil.extractedUserIdFromHeader(token); // JWT에서 userId 추출
 
-            // FileDTO 리스트 반환
-            List<FileDTO> uploadedFiles = fileService.uploadFiles(files, teamId, userId);
+            // FileService의 메서드 호출 순서 수정
+            List<FileDTO> uploadedFiles = fileService.uploadFiles(files, teamId, userId, userName);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "파일 업로드 완료");
+            response.put("message", "파일 업로드 성공");
             response.put("files", uploadedFiles);
 
-            logResponse(response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", "fail");
             response.put("message", "파일 업로드 실패: " + e.getMessage());
 
-            logResponse(response);
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+
 
     // 파일 삭제
     @DeleteMapping("/delete")

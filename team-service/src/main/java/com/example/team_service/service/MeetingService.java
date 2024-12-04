@@ -22,7 +22,7 @@ public class MeetingService {
     private final TeamMemberRepository teamMemberRepository;
 
     // 미팅룸 생성
-    public MeetingDTO createMeeting(Long teamId, Long userId, String meetingName, String meetingUrl) {
+    public MeetingDTO createMeeting(Long teamId, Long userId, String meetingName, String meetingUrl, String userName) {
         // Team 및 TeamMember 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 팀을 찾을 수 없습니다: " + teamId));
@@ -31,10 +31,12 @@ public class MeetingService {
 
         // Meeting 엔티티 생성 및 저장
         Meeting meeting = new Meeting(team, creator, meetingName, meetingUrl);
+        meeting.setUserName(userName); // user_name 저장
         Meeting savedMeeting = meetingRepository.save(meeting);
 
         return convertToMeetingDTO(savedMeeting);
     }
+
 
     // 미팅룸 조회 (meeting_id로 조회)
     public MeetingDTO getMeetingById(Long meetingId) {
@@ -70,7 +72,9 @@ public class MeetingService {
                 .createdBy(meeting.getCreatedBy().getTeamMemberId())
                 .meetingName(meeting.getMeetingName())
                 .meetingUrl(meeting.getMeetingUrl())
+                .userName(meeting.getUserName()) // userName
                 .meetingDate(meeting.getMeetingDate())
                 .build();
     }
+
 }

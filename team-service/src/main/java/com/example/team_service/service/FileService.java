@@ -25,7 +25,7 @@ public class FileService {
     private final FileRepository fileRepository;
 
     // 파일 업로드 (단일/다중 지원)
-    public List<FileDTO> uploadFiles(List<MultipartFile> files, Long teamId, Long userId) throws Exception {
+    public List<FileDTO> uploadFiles(List<MultipartFile> files, Long teamId, Long userId, String userName) throws Exception {
         String uploadDir = "uploads/";
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
@@ -46,6 +46,7 @@ public class FileService {
                 fileEntity.setFilePath(filePath);
                 fileEntity.setFileSize((int) file.getSize());
                 fileEntity.setUploadedBy(userId);
+                fileEntity.setUserName(userName); // userName 저장
                 fileEntity.setTeamId(teamId);
                 fileEntity.setUploadDate(LocalDateTime.now());
 
@@ -66,6 +67,7 @@ public class FileService {
 
         return uploadedFileDTOs;
     }
+
 
     // 파일 삭제 (단일/다중 지원)
     public void deleteFiles(List<Long> fileIds) throws Exception {
@@ -169,6 +171,7 @@ public class FileService {
                 .filePath(file.getFilePath())
                 .fileSize(file.getFileSize())
                 .uploadedBy(file.getUploadedBy())
+                .userName(file.getUserName()) // user_name 추가
                 .uploadDate(file.getUploadDate())
                 .build();
     }

@@ -24,11 +24,13 @@ public class MeetingController {
     public ResponseEntity<?> createMeeting(@RequestParam("teamId") Long teamId,
                                            @RequestParam("meetingName") String meetingName,
                                            @RequestParam(value = "meetingUrl", required = false) String meetingUrl,
+                                           @RequestParam("userName") String userName, // userName 추가
                                            @RequestHeader("Authorization") String token) {
         try {
-            Long userId = jwtUtil.extractedUserIdFromHeader(token);
+            Long userId = jwtUtil.extractedUserIdFromHeader(token); // JWT에서 userId 추출
 
-            MeetingDTO createdMeeting = meetingService.createMeeting(teamId, userId, meetingName, meetingUrl);
+            // 서비스 호출 시 userName 추가
+            MeetingDTO createdMeeting = meetingService.createMeeting(teamId, userId, meetingName, meetingUrl, userName);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -44,6 +46,7 @@ public class MeetingController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
 
     // 미팅룸 조회 (meetingId로 조회)
     @GetMapping("/{meetingId}")

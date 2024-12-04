@@ -21,5 +21,7 @@ public class NoticeDTO {
     private LocalDateTime createdDate;
 
     private Long userId; // 작성자 ID
+    private String userName; // 작성자 이름 추가
     private String role; // 작성자 역할 (MASTER, ADMIN, MEMBER)
 }
+
