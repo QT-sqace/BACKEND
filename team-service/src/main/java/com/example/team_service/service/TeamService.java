@@ -1,8 +1,12 @@
 package com.example.team_service.service;
 
 import com.example.team_service.client.CalendarServiceClient;
+import com.example.team_service.client.ChatServiceClient;
 import com.example.team_service.client.UserServiceClient;
+import com.example.team_service.dto.external.BasicInfoDto;
+import com.example.team_service.dto.external.ChatParticipantAddRequestDto;
 import com.example.team_service.dto.external.TeamCalendarRequestDto;
+import com.example.team_service.dto.external.TeamChatRequestDto;
 import com.example.team_service.dto.request.TeamCreateRequestDto;
 import com.example.team_service.dto.response.TeamListResponseDto;
 import com.example.team_service.entity.Team;
@@ -34,6 +38,7 @@ public class TeamService {
     private final EmailService emailService;
     private final CalendarServiceClient calendarServiceClient;
     private final UserServiceClient userServiceClient;
+    private final ChatServiceClient chatServiceClient;
     private final ExecutorService executorService;  //비동기 처리용
 
 
@@ -61,6 +66,18 @@ public class TeamService {
         //팀 캘린더 생성 요청 (Feign Client 호출)
         TeamCalendarRequestDto requestDto = new TeamCalendarRequestDto(team.getTeamId());
         calendarServiceClient.createTeamCalendar(requestDto);
+
+        //팀 생성자 프로필 요청 (Feign Client 호출)
+        String creatorProfileImage = userServiceClient.getUserProfile(masterMember.getUserId());
+        BasicInfoDto basicInfo = userServiceClient.getUserBasicInfo(masterMember.getUserId());
+        String userName = basicInfo.getUserName();
+        log.info("userName 가져오는거 확인: {}", userName);
+
+        //팀 채팅방 생성 요청 (Feign Client 호출)
+        TeamChatRequestDto teamChatRequestDto = new TeamChatRequestDto(team.getTeamId(), team.getProjectName(), team.getProjectImage(),
+                masterMember.getUserId(),userName,creatorProfileImage);
+        chatServiceClient.createRoom(teamChatRequestDto);
+
 
         //초대 링크 발송
         for (String email : request.getEmails()) {
@@ -122,6 +139,17 @@ public class TeamService {
         //팀 멤버로 추가
         TeamMember newMember = new TeamMember(team, userId, TeamMember.Role.MEMBER, LocalDateTime.now());
         teamMemberRepository.save(newMember);
+
+        //가입한 멤버의 프로필 경로 가져오기 feign 호출
+        String profileImage = userServiceClient.getUserProfile(newMember.getUserId());
+        BasicInfoDto basicInfo = userServiceClient.getUserBasicInfo(newMember.getUserId());
+        String userName = basicInfo.getUserName();
+        log.info("userName 가져오는거 확인: {}", userName);
+
+        //팀 채팅방에 추가시키기
+        ChatParticipantAddRequestDto requestDto = new ChatParticipantAddRequestDto(
+                team.getTeamId(), userId,userName, profileImage);
+        chatServiceClient.addParticipant(requestDto);
 
         log.info("회원번호: {} 성공적으로 팀에 가입 팀명: {}  ", userId, team.getProjectName());
 
