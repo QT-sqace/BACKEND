@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    environment {
+        CI = 'false'
+        DOCKER_IMAGE = 'hajewoong/qt-sqace-backend'
+        PATH = "$PATH:$HOME/bin"
+        JAVA_HOME="/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.0.1.el8.x86_64"
+    }
+    stages {
+        stage('build docker image') {
+            steps {
+                sh '''
+                cd team-service
+                docker build -t ${DOCKER_IMAGE}-team-service:latest .
+                '''
+            }
+        }
+        stage('Push Docker Image'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    sh 'docker push ${DOCKER_IMAGE}-team-service:latest'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                sh 'kubectl apply -f team-service/src/main/k8s/k8s.yaml'
+            }
+        }
+    }
+    post{
+        always{
+            sh 'docker rmi -f $(docker images -q)'
+        }
+    }
+}

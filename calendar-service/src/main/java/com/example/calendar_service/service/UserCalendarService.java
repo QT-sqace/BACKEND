@@ -7,6 +7,7 @@ import com.example.calendar_service.entity.CalendarInfo;
 import com.example.calendar_service.repository.CalendarInfoRepository;
 import com.example.calendar_service.repository.CalendarRepository;
 import com.example.calendar_service.repository.CalendarSharedRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserCalendarService {
 
     private final CalendarRepository calendarRepository;
@@ -121,7 +123,7 @@ public class UserCalendarService {
         } else if ( event.getEventType() == CalendarInfo.EventType.TEAM) {
             //팀 일정은 캘린더shared를 지워서 개인 캘린더에 표시 x
             Calendar calendar = calendarRepository.findByUserId(userId);
-            calendarSharedRepository.deleteByCalendarIdAndEventId(eventId,calendar.getCalendarId());
+            calendarSharedRepository.deleteByCalendarIdAndEventId(calendar.getCalendarId(), eventId);
         }
     }
 }

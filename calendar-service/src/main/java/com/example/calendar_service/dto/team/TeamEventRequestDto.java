@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class TeamEventRequestDto {
+    //팀 일정 요청 DTO
     private Long teamId;
     private String title;
     private String content;

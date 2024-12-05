@@ -1,5 +1,6 @@
 package com.example.user_service.controller;
 
+import com.example.user_service.common.UserStatusManager;
 import com.example.user_service.dto.request.auth.CheckCertificationRequestDto;
 import com.example.user_service.dto.request.auth.EmailCertificationRequestDto;
 import com.example.user_service.dto.request.auth.SignInRequestDto;
@@ -34,6 +35,7 @@ public class AuthController {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
+    private final UserStatusManager userStatusManager;
 
     //requestbody로 프론트가 보낸 json 데이터 dto 객체로 매핑
     //valid 어노테이션은 dto 에서 정의한 유효성 검사 조건 확인
@@ -100,7 +102,7 @@ public class AuthController {
 
     //카톡 소셜 로그인
     @GetMapping("/auth/social/kakao/{userId}")
-    public ResponseEntity<SignInResponseDto> kakaoLoginCallback(@PathVariable Long userId) {
+    public ResponseEntity<SignInResponseDto> kakaoLoginCallback(@PathVariable("userId") Long userId) {
         log.info("kakaoLoginCallback 호출됨, userId: {}", userId); // 요청 확인 로그
 
         User user = userRepository.findById(userId).orElse(null);
@@ -110,6 +112,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(null); // 사용자 정보가 없을 경우 401 응답
         }
+
+        //Redis에 접속상태 - online
+        userStatusManager.setOnline(userId);
 
         // JWT 토큰 생성
         String accessToken = jwtProvider.create(String.valueOf(userId), "kakao");
@@ -122,7 +127,7 @@ public class AuthController {
 
     //구글 소셜 로그인
     @GetMapping("/auth/social/google/{userId}")
-    public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable Long userId) {
+    public ResponseEntity<SignInResponseDto> googleLoginCallback(@PathVariable("userId") Long userId) {
 
         log.info("googleLoginCallback 호출됨, userId: {}", userId);
 
@@ -133,6 +138,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(null);
         }
+
+        //redis에 접속상태 online
+        userStatusManager.setOnline(userId);
 
         //JWT 토큰 생성
         String accessToken = jwtProvider.create(String.valueOf(userId), "google");

@@ -20,4 +20,10 @@ public class CalendarShared {
 
     @Column(nullable = false)
     private Long eventId;   //팀 이벤트 ID
+
+    //팀 일정 등록시 등록되게 사용
+    public CalendarShared(Long calendarId, Long eventId) {
+        this.calendarId = calendarId;
+        this.eventId = eventId;
+    }
 }
