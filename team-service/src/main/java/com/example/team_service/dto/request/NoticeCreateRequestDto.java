@@ -16,4 +16,6 @@ public class NoticeCreateRequestDto {
 
     @NotNull(message = "작성자 ID는 필수입니다.")
     private Long teamMemberId;  // 작성자(TeamMember) ID
+
+    private String userName; // 추가된 필드
 }

@@ -36,10 +36,12 @@ public class NoticeController {
                 return createErrorResponse("권한이 없습니다: 요청한 사용자는 해당 팀의 멤버가 아닙니다.");
             }
 
+            // 공지사항 생성
             NoticeDTO noticeDTO = noticeService.createNotice(
                     request.getTitle(),
                     request.getContent(),
-                    request.getTeamMemberId()
+                    request.getTeamMemberId(),
+                    request.getUserName() // userName 추가
             );
 
             Map<String, Object> response = new HashMap<>();
@@ -53,6 +55,7 @@ public class NoticeController {
             return createErrorResponse("공지사항 생성 실패: " + e.getMessage());
         }
     }
+
 
     // 공지사항 단건 조회
     @GetMapping("/{id}")

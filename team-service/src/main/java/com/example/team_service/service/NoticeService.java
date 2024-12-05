@@ -36,15 +36,19 @@ public class NoticeService {
 
 
     // 공지사항 생성
-    public NoticeDTO createNotice(String title, String content, Long teamMemberId) {
+    public NoticeDTO createNotice(String title, String content, Long teamMemberId, String userName) {
         TeamMember teamMember = teamMemberRepository.findById(teamMemberId)
                 .orElseThrow(() -> new IllegalArgumentException("팀 멤버를 찾을 수 없습니다: " + teamMemberId));
 
+        // Notice 엔티티 생성 시 userName 추가
         Notice notice = new Notice(title, content, teamMember);
+        notice.setUserName(userName); // userName 저장
+
         Notice savedNotice = noticeRepository.save(notice);
 
         return convertToDTO(savedNotice);
     }
+
 
     // 공지사항 수정
     public NoticeDTO updateNotice(Long noticeId, String newTitle, String newContent) {
@@ -97,6 +101,7 @@ public class NoticeService {
                 .content(notice.getContent())
                 .createdDate(notice.getCreatedDate())
                 .userId(notice.getCreatedBy().getUserId())
+                .userName(notice.getUserName()) // userName 추가
                 .role(notice.getCreatedBy().getRole().name())
                 .build();
     }
