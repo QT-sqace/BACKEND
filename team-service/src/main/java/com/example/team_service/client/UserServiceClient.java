@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "user-service-client", url = "http://localhost:8000/userservice", configuration = FeignClientConfig.class)
 public interface UserServiceClient {
-    //유저서비스를 통해서 유저 정보 가져옴
+    //유저서비스를 통해서 유저 정보 가져옴(닉네임)
     @GetMapping("/basic/{user_id}")
     BasicInfoDto getUserBasicInfo(@PathVariable("user_id") Long userId);
 
-    //팀 리스트 조회에서 유저 이미지 조회
+    //팀 리스트 조회에서 유저 이미지 조회, 팀생성 시점에 생성자 프로필 이미지 조회
     @GetMapping("/profile/{userId}")
     String getUserProfile(@PathVariable("userId") Long userId);
 }

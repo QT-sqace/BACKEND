@@ -36,7 +36,7 @@ public class FileController {
 
     // 파일 삭제
     @DeleteMapping("/delete/{fileId}")
-    public ResponseEntity<String> deleteFile(@PathVariable Long fileId) {
+    public ResponseEntity<String> deleteFile(@PathVariable("fileId") Long fileId) {
         try {
             fileService.deleteFile(fileId);
             return ResponseEntity.ok("파일 삭제 완료");
@@ -47,7 +47,7 @@ public class FileController {
 
     // 파일 다운로드
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") Long fileId) {
         try {
             // 파일 리소스 가져오기
             Resource resource = fileService.downloadFile(fileId);
