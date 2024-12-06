@@ -15,7 +15,6 @@ public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
 
-
     // ID로 특정 멤버 조회
     public TeamMember getTeamMemberById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId)
@@ -32,8 +31,9 @@ public class TeamMemberService {
         return teamMemberRepository.findAllByUserId(userId);
     }
 
+    // 특정 팀의 멤버 정보를 DTO로 반환
     public List<TeamMemberInfoDto> getTeamMembers(Long teamId) {
-        List<TeamMember> teamMembers = teamMemberRepository.findByTeam_TeamId(teamId);
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByTeamTeamId(teamId);
         return teamMembers.stream()
                 .map(member -> new TeamMemberInfoDto(
                         member.getUserId(),
