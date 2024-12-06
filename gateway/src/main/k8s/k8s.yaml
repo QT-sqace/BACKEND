@@ -46,15 +46,19 @@ kind: Ingress
 metadata:
   name: gateway-ingress
   namespace: spring-boot-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2  # 재작성 규칙 설정
+    nginx.ingress.kubernetes.io/use-regex: "true"   # 정규식을 사용
 spec:
+  ingressClassName: nginx
   rules:
-    - host: api.sqace.site  # 서브도메인 설정
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /api(/|$)(.*)
             pathType: Prefix
             backend:
               service:
-                name: gateway  # 게이트웨이 서비스 이름
+                name: gateway  # React 앱 서비스 이름
                 port:
-                  number: 8000  # 게이트웨이 서비스 포트
+                  number: 8000
+
