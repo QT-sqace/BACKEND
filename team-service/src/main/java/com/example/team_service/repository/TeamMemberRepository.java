@@ -13,5 +13,10 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     // 특정 유저의 모든 멤버십 조회
     List<TeamMember> findAllByUserId(Long userId);
 
+    //userId로 팀 멤버 조회
+    List<TeamMember> findByUserId(Long userId);
+
+    //team 필드의 teamId를 조건으로 조회
+    List<TeamMember> findByTeam_TeamId(Long teamId);
 }
 

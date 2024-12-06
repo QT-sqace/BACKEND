@@ -86,7 +86,8 @@ public class TeamService {
             teamInviteRepository.save(invite);
 
             //추후에 배포할때는 https://yourdomain.com/invite/{inviteToken} 여기로 수정
-            String inviteLink = "http://sqace.site/invite/" + inviteToken;
+//            String inviteLink = "http://sqace.site/invite/" + inviteToken;
+            String inviteLink = "http://localhost:3000/invite/" + inviteToken;
             emailService.sendEmail(email, inviteLink);
             log.info("보낸 이메일: {}, 초대 링크: {}", email, inviteLink);
         }
