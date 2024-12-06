@@ -26,12 +26,21 @@ spring:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 logging:
-  level:
-    org.springframework: DEBUG
-    com.example.gateway:
-      config.LoggingFilterConfig: DEBUG
   pattern:
     console: >-
-      {"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSS}", "level":"%p", "thread":"%t", "logger":"%c", "message":"%m"%n}
+      {
+        "timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSS}",
+        "level":"%p",
+        "thread":"%t",
+        "logger":"%c",
+        "message":"%m",
+        "service.name":"user-service"
+      }%n
+  level:
+    org.springframework: info
+    com.example.gateway:
+      config.LoggingFilterConfig: info
+
+
 
 secret-key: "ThisStatementIsJwtSecretKeyDoNotUseThisStatement"
