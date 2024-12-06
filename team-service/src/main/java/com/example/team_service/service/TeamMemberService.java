@@ -15,6 +15,7 @@ public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
 
+
     // ID로 특정 멤버 조회
     public TeamMember getTeamMemberById(Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId)
