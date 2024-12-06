@@ -74,7 +74,7 @@ public class WebSecurityConfig {
     protected CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("http://sqace.site"); // 프론트엔드 출처 명시
+        corsConfiguration.addAllowedOrigin("http://172.16.211.23"); // 프론트엔드 출처 명시
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.setAllowCredentials(true); // 인증 정보 포함 허용
