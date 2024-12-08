@@ -1,10 +1,12 @@
 package com.example.team_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -15,27 +17,25 @@ public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long team_id;
-
-    @Column(nullable = false, unique = true)
-    private String project_name;
+    private Long teamId;
 
     @Column(nullable = false)
-    private String password;
+    private String projectName; // 팀 이름
 
-    private String project_image;
+    @Column(nullable = false)
+    private String teamPassword; // 팀 비밀번호
 
-    @Column(name = "admin_user_id", nullable = false) // 관리자의 user_id 컬럼 추가
-    private Long admin_user_id;
+    private String projectImage; // 팀 이미지 경로
 
     // TeamMember와의 일대다 관계 설정
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TeamMember> members;
+    @JsonIgnore // 순환 참조 방지
+    private Set<TeamMember> members = new HashSet<>();
 
-    public Team(String project_name, String password, String project_image, Long admin_user_id) {
-        this.project_name = project_name;
-        this.password = password;
-        this.project_image = project_image;
-        this.admin_user_id = admin_user_id;
+    // 생성자
+    public Team(String project_name, String password, String project_image) {
+        this.projectName = project_name;
+        this.teamPassword = password;
+        this.projectImage = project_image;
     }
 }

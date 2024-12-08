@@ -21,17 +21,6 @@ spring:
           filters:
             - RewritePath=/aiservice/(?<segment>.*), /$\{segment}
             - name: JwtAuthenticationFilter #필터 적용
-#
-#        - id: userservice-filter
-#          uri: lb://USER-SERVICE
-#          predicates:
-#            - Path=/userservice/user/**
-#          filters:
-#            - RewritePath=/userservice/user/(?<segment>.*), /user/$\{segment}
-#            - name: JwtAuthenticationFilter
-#              args:
-#                order: -1
-
 
         - id: userservice
           uri: lb://USER-SERVICE
@@ -47,7 +36,27 @@ spring:
           filters:
             - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
 
+        - id: calendarservice
+          uri: lb://CALENDAR-SERVICE
+          predicates:
+            - Path=/calendarservice/**
+          filters:
+            - RewritePath=/calendarservice/(?<segment>.*), /$\{segment}
 
+        - id: chatservice
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/chatservice/**
+          filters:
+            - RewritePath=/chatservice/(?<segment>.*), /$\{segment}
+
+#        # WebSocket 요청 처리
+#        - id: chatservice-websocket
+#          uri: lb://CHAT-SERVICE
+#          predicates:
+#            - Path=/chatservice/ws # WebSocket 요청 경로
+#          filters:
+#            - RewritePath=/chatservice/ws, /ws # 경로 재작성
 
       # Global CORS 설정
       globalcors:
@@ -55,6 +64,8 @@ spring:
           '[/**]':  # 모든 경로에 대해 CORS 설정 적용
             allowedOrigins:
               - "http://localhost:3000"
+              - "https://jiangxy.github.io" # stomp웹사이트 테스트 도메인
+              - "https://www.toolfk.com" # 추후에는 이런식으로 배포 도메인 사용
             allowedMethods:
               - GET
               - POST

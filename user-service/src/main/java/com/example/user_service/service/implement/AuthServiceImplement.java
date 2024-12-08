@@ -1,6 +1,9 @@
 package com.example.user_service.service.implement;
 
+import com.example.user_service.client.CalendarServiceClient;
 import com.example.user_service.common.CertificationNumber;
+import com.example.user_service.common.UserStatusManager;
+import com.example.user_service.dto.external.UserCalendarRequestDto;
 import com.example.user_service.dto.request.auth.CheckCertificationRequestDto;
 import com.example.user_service.dto.request.auth.EmailCertificationRequestDto;
 import com.example.user_service.dto.request.auth.SignInRequestDto;
@@ -37,9 +40,11 @@ public class AuthServiceImplement implements AuthService {
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
     private final CertificationRepository certificationRepository;
+    private final CalendarServiceClient calendarServiceClient;
 
     private final EmailProvider emailProvider;
     private final JwtProvider jwtProvider;
+    private final UserStatusManager userStatusManager;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -128,6 +133,10 @@ public class AuthServiceImplement implements AuthService {
             UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt,defaultProfileImage);
             userInfoRepository.save(userInfoEntity);
 
+            //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
+            UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
+            calendarServiceClient.createPersonalCalendar(requestDto);
+
             //저장 후에는 인증번호 삭제
             certificationRepository.deleteByEmail(email);
 
@@ -164,6 +173,9 @@ public class AuthServiceImplement implements AuthService {
             //토큰 생성하기
             Long userId = userEntity.getUserId();
             String provider = "email";
+
+            //redis에 접속상태 - online
+            userStatusManager.setOnline(userId);
 
             //나중에 로그인후 토큰 오류나면 여기 확인하기
 //            token = jwtProvider.create(String.valueOf(userId));

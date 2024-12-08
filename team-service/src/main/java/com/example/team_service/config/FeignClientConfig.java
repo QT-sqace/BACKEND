@@ -9,8 +9,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 public class FeignClientConfig {
-
     //FeignClient로 요청보낼때 teamservice -> userservice로 갈때 헤더에 토큰이 담기게 지정
+
     @Bean
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {

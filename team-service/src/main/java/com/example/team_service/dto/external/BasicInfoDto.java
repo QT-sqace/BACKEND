@@ -1,4 +1,4 @@
-package com.example.team_service.dto;
+package com.example.team_service.dto.external;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
