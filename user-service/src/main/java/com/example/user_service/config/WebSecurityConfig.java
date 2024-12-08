@@ -50,7 +50,6 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/", "/oauth/**", "/auth/**", "/userservice/**", "/images/**").permitAll()
-                        .requestMatchers("/jira/auth/login", "/jira/auth/callback").permitAll() // 추가된 경로
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()  //나머지는 모든 인증이 필요

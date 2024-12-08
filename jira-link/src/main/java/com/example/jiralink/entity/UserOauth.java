@@ -1,4 +1,4 @@
-package com.example.user_service.entity;
+package com.example.jiralink.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,11 +22,13 @@ public class UserOauth {
     @Column(nullable = false)
     private String linkedProvider;
 
-    @Column(nullable = false)
-    private String linkedProviderId;
+    private String cloudId;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String accessToken;
+
     private String refreshToken;
     private Long expiresAt;
     private Timestamp linkedAt;
 }
+
