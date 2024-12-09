@@ -25,7 +25,7 @@ public class UserApiController {
     private final UserClientService userService;
 
     @GetMapping("/basic/{userId}")
-    public ResponseEntity<BasicInfoDto> getUserBasicInfo(@PathVariable Long userId) {
+    public ResponseEntity<BasicInfoDto> getUserBasicInfo(@PathVariable("userId") Long userId) {
         // userId를 통해 User 엔티티에서 email 조회
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
@@ -48,7 +48,7 @@ public class UserApiController {
     }
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<String> getUserProfile(@PathVariable Long userId) {
+    public ResponseEntity<String> getUserProfile(@PathVariable("userId") Long userId) {
         String profileImage = userService.getProfileImage(userId);
         return ResponseEntity.ok(profileImage);
 
