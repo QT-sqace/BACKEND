@@ -6,21 +6,21 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: calender-service
+  name: calendar-service
   namespace: spring-boot-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: calender-service
+      app: calendar-service
   template:
     metadata:
       labels:
-        app: calender-service
+        app: calendar-service
     spec:
       containers:
-        - name: calender-service
-          image: hajewoong/qt-sqace-backend-calender-service:latest
+        - name: calendar-service
+          image: hajewoong/qt-sqace-backend-calendar-service:latest
           ports:
             - containerPort: 8084
           env:
@@ -30,12 +30,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: calender-service
+  name: calendar-service
   namespace: spring-boot-app
 spec:
   type: ClusterIP
   selector:
-    app: calender-service
+    app: calendar-service
   ports:
     - protocol: TCP
       port: 8084

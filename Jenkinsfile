@@ -10,9 +10,9 @@ node {
         dir('team-service') {
             load 'Jenkinsfile'
         }
-    }else if(branchName=='calender_service'){
+    }else if(branchName=='calendar_service'){
         checkout scm
-        dir('calender-service'){
+        dir('calendar-service'){
             load 'Jenkinsfile'
         }
     }
