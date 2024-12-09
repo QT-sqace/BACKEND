@@ -1,4 +1,4 @@
-package com.example.user_service.jira.config;
+package com.example.jiralink.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +18,9 @@ public class JiraConfig {
 
     @Value("${jira.redirect-uri}")
     private String redirectUri;
+
+    @Value("${jira.scopes}")
+    private String jiraScopes;
 
     @Bean
     public RestTemplate restTemplate() {
