@@ -1,7 +1,9 @@
 package com.example.chat_service.controller;
 
 import com.example.chat_service.dto.external.ChatParticipantAddRequestDto;
+import com.example.chat_service.dto.external.ChatParticipantDeleteRequestDto;
 import com.example.chat_service.dto.external.TeamChatRequestDto;
+import com.example.chat_service.dto.external.UpdateTeamNameRequestDto;
 import com.example.chat_service.dto.request.ChatMessageDto;
 import com.example.chat_service.dto.response.ChatRoomDataResponseDto;
 import com.example.chat_service.dto.response.ChatRoomDto;
@@ -40,6 +42,22 @@ public class TeamChatRoomController {
         chatService.addParticipant(requestDto);
         chatRoomService.updateUserChatRoomsInRedis(requestDto.getUserId());
         return ResponseEntity.ok("팀채팅방 팀원 추가 성공");
+    }
+
+    //팀 채팅방 추방요청
+    @PostMapping("/delete/participant")
+    public ResponseEntity<String> deleteParticipant(@RequestBody ChatParticipantDeleteRequestDto requestDto) {
+        chatService.deleteParticipant(requestDto);
+
+        return ResponseEntity.ok("팀 채팅방에서 추방 성공");
+    }
+
+    //팀 채팅방 이름변경 요청 - 페인
+    @PutMapping("/update/teamName")
+    public ResponseEntity<String> updateTeamName(@RequestBody UpdateTeamNameRequestDto requestDto) {
+        chatService.updateTeamName(requestDto);
+
+        return ResponseEntity.ok("팀 채팅방 이름변경 성공");
     }
 
     //팀 채팅방 리스트 조회

@@ -54,6 +54,10 @@ public class ChatRoom {
         this.roomCreatedAT = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
     }
 
+    public void updateTeamName(String newRoomName) {
+        this.roomName = newRoomName;
+    }
+
 
     public enum RoomState {
         TEAM, PRIVATE
