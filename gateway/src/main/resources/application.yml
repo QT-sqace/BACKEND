@@ -12,6 +12,12 @@ spring:
             - Path=/userservice/**
           filters:
             - RewritePath=/userservice/(?<segment>.*), /${segment}
+        - id: calendar-service
+          uri: http://calendar-service.spring-boot-app.svc.cluster.local:8084
+          predicates:
+            - Path=/calendarservice/**
+          filters:
+            - RewritePath=/calendarservice/(?<segment>.*), /${segment}
       # Global CORS 설정
       globalcors:
         corsConfigurations:
