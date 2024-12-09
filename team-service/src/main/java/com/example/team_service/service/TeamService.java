@@ -3,12 +3,11 @@ package com.example.team_service.service;
 import com.example.team_service.client.CalendarServiceClient;
 import com.example.team_service.client.ChatServiceClient;
 import com.example.team_service.client.UserServiceClient;
-import com.example.team_service.dto.external.BasicInfoDto;
-import com.example.team_service.dto.external.ChatParticipantAddRequestDto;
-import com.example.team_service.dto.external.TeamCalendarRequestDto;
-import com.example.team_service.dto.external.TeamChatRequestDto;
+import com.example.team_service.dto.external.*;
 import com.example.team_service.dto.request.TeamCreateRequestDto;
+import com.example.team_service.dto.response.ManagementInfoDto;
 import com.example.team_service.dto.response.TeamListResponseDto;
+import com.example.team_service.dto.response.TeamManagementResponseDto;
 import com.example.team_service.entity.Team;
 import com.example.team_service.entity.TeamInvite;
 import com.example.team_service.entity.TeamMember;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -134,6 +134,7 @@ public class TeamService {
         Team team = invite.getTeam();
         if (!passwordEncoder.matches(password, team.getTeamPassword())) {
             log.error("유효하지 않은 팀 패스워드 팀은: {}", team.getProjectName());
+            log.error("팀 비밀번호: {}", team.getTeamPassword());
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
@@ -194,6 +195,8 @@ public class TeamService {
         return teamList;
     }
 
+
+
     /**
      * 팀에 가입시점에 최초 한번만 호출
      * 비동기 동기화로 추후에 팀에 가입한 회원도 개인 캘린더에 팀 일정 가져오기
@@ -206,5 +209,162 @@ public class TeamService {
         } catch (Exception e) {
             log.error("팀 일정 동기화 실패 - teamId: {}, userId: {}", teamId, userId, e);
         }
+    }
+
+    //팀 마이페이지 정보 조회
+    public TeamManagementResponseDto getTeamManagementInfo(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(()->new IllegalArgumentException("팀 정보 없음"));
+
+        //팀 멤버 정보 가져오기
+        List<TeamMember> teamMembers = teamMemberRepository.findByTeam_TeamId(teamId);
+
+         List<ManagementInfoDto> managementInfoDtos = teamMembers.stream()
+                .map(member -> {
+                    //feign호출
+                    UserInfoDto userInfo = userServiceClient.getUserInfo(member.getUserId());
+
+                    return new ManagementInfoDto(
+                            member.getUserId(),
+                            userInfo.getUserName(),
+                            userInfo.getContactEmail(),
+                            userInfo.getPhoneNumber(),
+                            userInfo.getProfileImage(),
+                            member.getRole()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new TeamManagementResponseDto(
+                team.getProjectName(),
+                managementInfoDtos
+        );
+    }
+
+    public void updateTeamName(Long teamId, String newTeamName, Long userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("팀 정보가 없습니다."));
+
+        TeamMember teamMember = teamMemberRepository.findByTeamAndUserId(team, userId);
+
+        if (teamMember.getRole() != TeamMember.Role.MASTER && teamMember.getRole() != TeamMember.Role.ADMIN) {
+            throw new IllegalArgumentException("팀 이름을 변경할 권한이 없습니다.");
+        }
+
+        UpdateTeamNameRequestDto requestDto = new UpdateTeamNameRequestDto(teamId, newTeamName);
+        try {
+            chatServiceClient.updateTeamName(requestDto);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("채팅 서비스에 팀 이름 전달중 오류발생");
+        }
+
+        team.setProjectName(newTeamName);
+        teamRepository.save(team);
+    }
+
+    public void grantAdminRole(Long teamId, Long targetUserId, Long requestUserId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("팀 정보가 없습니다."));
+        TeamMember requester = teamMemberRepository.findByTeamAndUserId(team, requestUserId);
+
+        if (requester.getRole() != TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("ADMIN 권한을 부여할 수 있는 권한이 없습니다.");
+        }
+
+        TeamMember targetMember = teamMemberRepository.findByTeamAndUserId(team, targetUserId);
+
+        if (targetMember.getRole() == TeamMember.Role.ADMIN) {
+            throw new IllegalArgumentException("해당 회원은 이미 ADMIN 권한입니다.");
+        }
+
+        if (targetMember.getRole() == TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("MASTER 권한은 변경이 불가능합니다.");
+        }
+
+        targetMember.setRole(TeamMember.Role.ADMIN);
+        teamMemberRepository.save(targetMember);
+    }
+
+    //팀원 추가 초대
+    public void grantMemberRole(Long teamId, Long targetUserId, Long requestUserId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("팀 정보가 없습니다."));
+        TeamMember requester = teamMemberRepository.findByTeamAndUserId(team, requestUserId);
+
+        if (requester.getRole() != TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("Member 권한을 부여할 수 있는 권한이 없습니다.");
+        }
+
+        TeamMember targetMember = teamMemberRepository.findByTeamAndUserId(team, targetUserId);
+
+        if (targetMember.getRole() == TeamMember.Role.MEMBER) {
+            throw new IllegalArgumentException("해당 회원은 이미 MEMBER 권한입니다.");
+        }
+
+        if (targetMember.getRole() == TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("MASTER 권한은 변경이 불가능합니다.");
+        }
+
+        targetMember.setRole(TeamMember.Role.MEMBER);
+        teamMemberRepository.save(targetMember);
+    }
+
+    public void addTeamMembers(Long teamId, Long requestUserId, List<String> emails) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("팀 정보가 없습니다."));
+        TeamMember requester = teamMemberRepository.findByTeamAndUserId(team, requestUserId);
+
+        if (requester.getRole() != TeamMember.Role.MASTER && requester.getRole() != TeamMember.Role.ADMIN) {
+            throw new IllegalArgumentException("팀원 초대 권한이 없습니다.");
+        }
+        //초대 토큰 가져오기
+        TeamInvite existingInvite = teamInviteRepository.findByTeam(team);
+
+        // 초대 토큰 만료 시간 확인 및 갱신
+        if (existingInvite.getExpirationTime().isBefore(LocalDateTime.now())) {
+            String newInviteToken = UUID.randomUUID().toString();
+            existingInvite = new TeamInvite(newInviteToken, team); // 새로운 초대 토큰 객체 생성
+            teamInviteRepository.save(existingInvite); // 새 초대 토큰 저장
+            log.info("초대 토큰 갱신 완료. 새로운 초대 토큰: {}", newInviteToken);
+        }
+
+        String inviteToken = existingInvite.getInviteToken();
+
+        //초대 링크 발송
+        for (String email : emails) {
+            //배포시 도메인으로 변경
+            String inviteLink = "http://localhost:3000/invite/" + inviteToken;
+            emailService.sendEmail(email, inviteLink);
+            log.info("추가 초대 이메일 발송 완료: {}, 초대 링크: {}", email, inviteLink);
+        }
+        log.info("팀 ID {}에 대한 추가 초대 완료.", teamId);
+
+    }
+
+    public void removeTeamMember(Long teamId, Long targetUserId, Long requestUserId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("팀 정보를 찾을 수 없습니다."));
+
+        TeamMember requester = teamMemberRepository.findByTeamAndUserId(team, requestUserId);
+        if (requester.getRole() != TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("팀원 추방 권한이 없습니다.");
+        }
+
+        TeamMember targetMember = teamMemberRepository.findByTeamAndUserId(team, targetUserId);
+        if (targetMember == null) {
+            throw new IllegalArgumentException("대상 팀원을 찾을 수 없습니다.");
+        }
+
+        if (targetMember.getRole() == TeamMember.Role.MASTER) {
+            throw new IllegalArgumentException("MASTER 권한의 팀원은 추방이 불가능합니다.");
+        }
+
+        teamMemberRepository.delete(targetMember);
+
+        //페인으로 팀캘린더, 팀 채팅방 제거하는 로직 필요
+        ChatParticipantDeleteRequestDto requestDto = new ChatParticipantDeleteRequestDto(teamId, targetUserId);
+        chatServiceClient.deleteParticipant(requestDto);
+
+        log.info("팀원 추방완료 - teamId: {}, targetUserId: {}", teamId, targetUserId);
     }
 }

@@ -34,10 +34,11 @@ public class UserInfo {
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public UserInfo(User user, String userName, LocalDateTime createdAt, String profileImage) {
+    public UserInfo(User user, String userName, LocalDateTime createdAt, String profileImage, String contactEmail) {
         this.user = user;
         this.userName = userName;
         this.createdAt = createdAt;
         this.profileImage = profileImage;
+        this.contactEmail = contactEmail;
     }
 }

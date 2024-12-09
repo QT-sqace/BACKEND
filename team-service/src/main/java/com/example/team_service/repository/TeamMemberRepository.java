@@ -1,5 +1,6 @@
 package com.example.team_service.repository;
 
+import com.example.team_service.entity.Team;
 import com.example.team_service.entity.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,7 +17,9 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     //userId로 팀 멤버 조회
     List<TeamMember> findByUserId(Long userId);
 
-    //team 필드의 teamId를 조건으로 조회
+    //팀 마이페이지에서 팀 멤버 조회
     List<TeamMember> findByTeam_TeamId(Long teamId);
+
+    TeamMember findByTeamAndUserId(Team team, Long userId);
 }
 
