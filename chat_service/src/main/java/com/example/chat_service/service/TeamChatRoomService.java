@@ -1,7 +1,9 @@
 package com.example.chat_service.service;
 
 import com.example.chat_service.dto.external.ChatParticipantAddRequestDto;
+import com.example.chat_service.dto.external.ChatParticipantDeleteRequestDto;
 import com.example.chat_service.dto.external.TeamChatRequestDto;
+import com.example.chat_service.dto.external.UpdateTeamNameRequestDto;
 import com.example.chat_service.dto.request.ChatMessageDto;
 import com.example.chat_service.dto.response.ChatParticipantDto;
 import com.example.chat_service.dto.response.ChatRoomDataResponseDto;
@@ -62,4 +64,25 @@ public class TeamChatRoomService {
     }
 
 
+    public void deleteParticipant(ChatParticipantDeleteRequestDto requestDto) {
+
+        ChatRoom room = roomRepository.findByTeamId(requestDto.getTeamId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 팀의 채팅방이 존재하지 않습니다."));
+
+        ChatParticipant participant = participantRepository.findByRoomAndUserId(room, requestDto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저는 채팅방에 없습니다."));
+
+        participantRepository.delete(participant);
+
+        log.info("팀ID: {}의 참여자ID: {} 가 성공적으로 제거되었습니다.",requestDto.getTeamId(), requestDto.getUserId());
+    }
+
+    public void updateTeamName(UpdateTeamNameRequestDto requestDto) {
+        ChatRoom room = roomRepository.findByTeamId(requestDto.getTeamId())
+                .orElseThrow(() -> new IllegalArgumentException("해당팀의 채팅방이 없습니다."));
+
+        room.updateTeamName(requestDto.getTeamName());
+
+        roomRepository.save(room);
+    }
 }

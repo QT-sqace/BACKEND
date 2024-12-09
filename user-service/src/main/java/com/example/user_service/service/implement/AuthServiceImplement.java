@@ -130,10 +130,10 @@ public class AuthServiceImplement implements AuthService {
 
 //            log.info("user엔티티 확인: "+ userEntity.toString());
             //유저 정보 저장
-            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt,defaultProfileImage);
+            UserInfo userInfoEntity = new UserInfo(userEntity, userName, createdAt,defaultProfileImage,email);
             userInfoRepository.save(userInfoEntity);
 
-            //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
+            //캘린더 서비스로 개인 캘린더 생성 요청
             UserCalendarRequestDto requestDto = new UserCalendarRequestDto(userEntity.getUserId());
             calendarServiceClient.createPersonalCalendar(requestDto);
 

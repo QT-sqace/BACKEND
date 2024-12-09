@@ -118,7 +118,7 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
                 userId = userEntity.getUserId();
 
                 LocalDateTime createdAt = LocalDateTime.now();
-                UserInfo userInfo = new UserInfo(userEntity, nickname, createdAt, defaultProfileImage);
+                UserInfo userInfo = new UserInfo(userEntity, nickname, createdAt, defaultProfileImage, email);
                 userInfoRepository.save(userInfo);
 
                 //캘린더 서비스로 개인 캘린더 생성 요청 - 임시로 막음
