@@ -10,7 +10,14 @@ node {
         dir('team-service') {
             load 'Jenkinsfile'
         }
-    } else {
+    }else if(branchName=='calender_service'){
+        checkout scm
+        dir('calender-service'){
+            load 'Jenkinsfile'
+        }
+    }
+
+     else {
         echo "No specific Jenkinsfile for this branch"
     }
 }
