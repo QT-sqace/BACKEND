@@ -19,7 +19,7 @@ spring:
           filters:
             - RewritePath=/calendarservice/(?<segment>.*), /${segment}
         - id: team-service
-          uri: http://team-service.spring-boot-app.svc.cluster.local:8084
+          uri: http://team-service.spring-boot-app.svc.cluster.local:8081
           predicates:
             - Path=/teamservice/**
           filters:
