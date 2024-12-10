@@ -19,7 +19,7 @@ spec:
         app: team-service
     spec:
       containers:
-        - name: gateway
+        - name: team-service
           image: hajewoong/qt-sqace-backend-team-service:latest
           ports:
             - containerPort: 8081
