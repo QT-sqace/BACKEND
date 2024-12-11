@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/todos")
@@ -48,10 +49,8 @@ public class TodoController {
 
     // 할 일 삭제
     @DeleteMapping("/{todoId}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable Long todoId) {
-        // 서비스 호출
-        todoService.deleteTodoById(todoId);
-
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Map<String, String>> deleteTodo(@PathVariable Long todoId) {
+        Map<String, String> response = todoService.deleteTodoById(todoId);
+        return ResponseEntity.ok(response); // 성공 메시지를 JSON 형식으로 반환
     }
 }
