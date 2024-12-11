@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    environment {
+        CI = 'false'
+        DOCKER_IMAGE = 'hajewoong/qt-sqace-backend'
+        PATH = "$PATH:$HOME/bin"
+    }
+    stages {
+        stage('test jira-auth-service') {
+            steps {
+                sh '''
+                cd jira-auth-service
+                ./gradlew :test
+                '''
+            }
+        }
+        stage('build docker image') {
+            steps {
+                sh '''
+                cd jira-auth-service
+                docker build -t ${DOCKER_IMAGE}-jira-auth-service:latest .
+                '''
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    sh 'docker push ${DOCKER_IMAGE}-jira-auth-service:latest'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                sh 'kubectl apply -f jira-auth-service/src/main/k8s/k8s.yaml'
+                sh 'kubectl rollout restart deployment/jira-auth-service -n spring-boot-app '
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker rmi -f $(docker images -q)'
+        }
+    }
+}
