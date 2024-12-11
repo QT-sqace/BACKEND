@@ -30,6 +30,7 @@ public class TeamController {
     @PostMapping("/create")
     public ResponseEntity<BasicResponseDto> createTeam(@RequestBody TeamCreateRequestDto request,
                                                        @RequestHeader("Authorization") String token) {
+        log.info("request create team {}", request);
         //토큰에서 userId 가져오기
         Long creatorUserId = jwtUtil.extractedUserIdFromHeader(token);
         teamService.createTeam(request, creatorUserId); // 사용자 ID를 서비스에 전달
