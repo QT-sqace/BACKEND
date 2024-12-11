@@ -41,4 +41,17 @@ public class UserInfo {
         this.profileImage = profileImage;
         this.contactEmail = contactEmail;
     }
+
+    // 특정 필드만 업데이트하는 메서드 추가
+    public UserInfo updateProfile(String userName, String contactEmail, String address,
+                                  String phoneNumber, String company, String profileImage) {
+        if (userName != null) this.userName = userName;
+        if (contactEmail != null) this.contactEmail = contactEmail;
+        if (address != null) this.address = address;
+        if (phoneNumber != null) this.phoneNumber = phoneNumber;
+        if (company != null) this.company = company;
+        if (profileImage != null) this.profileImage = profileImage;
+
+        return this;
+    }
 }

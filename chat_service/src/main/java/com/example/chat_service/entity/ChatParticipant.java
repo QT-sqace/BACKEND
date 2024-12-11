@@ -48,4 +48,9 @@ public class ChatParticipant {
     public void setLastReadMessageId(Long messageId) {
         this.lastReadMessageId = messageId;
     }
+
+    public void updateProfile(String username, String profileImage) {
+        this.userName = username;
+        this.profileImage = profileImage;
+    }
 }

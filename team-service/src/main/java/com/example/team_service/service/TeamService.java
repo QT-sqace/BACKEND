@@ -14,8 +14,12 @@ import com.example.team_service.entity.TeamMember;
 import com.example.team_service.repository.TeamInviteRepository;
 import com.example.team_service.repository.TeamMemberRepository;
 import com.example.team_service.repository.TeamRepository;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,17 +44,55 @@ public class TeamService {
     private final UserServiceClient userServiceClient;
     private final ChatServiceClient chatServiceClient;
     private final ExecutorService executorService;  //비동기 처리용
+    private final MinioClient minioClient;
 
+
+    @Value("${minio.bucket.user-profile}")
+    private String profileBucket;
+
+    @Value("${minio.server.url}")
+    private String minioUrl;
 
     // 팀 생성, 추후에 팀 로고 이미지를 MinIo 경로로 등록하는 로직 필요
+    @Transactional
     public void createTeam(TeamCreateRequestDto request, Long creatorUserId) {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
+        //팀 프로필사진 등록
+        String imageUrl = null;
+        if (request.getProjectImage() != null && !request.getProjectImage().isEmpty()) {
+            log.info("팀 프로필 로직 시작---- vpn 확인하세요");
+
+            try {
+                //파일명 생성
+                String originalFileName = request.getProjectImage().getOriginalFilename();
+                String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_"); // 한글, 특수문자 제거
+                String fileName = "teams/profile" + System.currentTimeMillis() + "_" + sanitizedFileName;
+
+                // MinIO에 파일 업로드
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(profileBucket) // 팀 프로필용 버킷
+                                .object(fileName)
+                                .stream(request.getProjectImage().getInputStream(), request.getProjectImage().getSize(), -1)
+                                .contentType(request.getProjectImage().getContentType())
+                                .build()
+                );
+
+                imageUrl = minioUrl + "/" + profileBucket + "/" + fileName;
+                log.info("팀 프로필 이미지 경로 확인: {}", imageUrl);
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e.getMessage() + "문제가 발생했습니다.");
+            }
+
+        }
+
+
         Team team = new Team(
                 request.getProjectName(),
                 encodedPassword,
-                request.getProjectImage()
+                imageUrl
         );
         teamRepository.save(team);
 
@@ -79,7 +121,7 @@ public class TeamService {
         chatServiceClient.createRoom(teamChatRequestDto);
 
 
-        //초대 링크 발송
+        //초대 링크 발송 - 여기 폼데이터일떄 기준으로 수정하기
         for (String email : request.getEmails()) {
             String inviteToken = UUID.randomUUID().toString();
             TeamInvite invite = new TeamInvite(inviteToken, team);
