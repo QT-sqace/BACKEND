@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spring-boot-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira-auth
+  namespace: spring-boot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jira-auth
+  template:
+    metadata:
+      labels:
+        app: jira-auth
+    spec:
+      containers:
+        - name: jira-auth
+          image: hajewoong/qt-sqace-backend-jira-auth:latest
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SERVER_PORT
+              value: "8084"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jira-auth
+  namespace: spring-boot-app
+spec:
+  type: ClusterIP
+  selector:
+    app: jira-auth
+  ports:
+    - protocol: TCP
+      port: 8084
+      targetPort: 8084
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jira-auth-ingress
+  namespace: spring-boot-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /jira
+            pathType: prefix
+            backend:
+              service:
+                name: jira-auth
+                port:
+                  number: 8084
+
+
