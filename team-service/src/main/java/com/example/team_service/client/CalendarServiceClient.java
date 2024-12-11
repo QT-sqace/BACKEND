@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "calendar-service-client", url = "http://localhost:8000/calendarservice")
+@FeignClient(name = "calendar-service-client", url = "calendar-service.spring-boot-app.svc.cluster.local:8084")
 public interface CalendarServiceClient {
 
     //팀 생성 시점에 캘린더 서비스로 캘린더 생성요청 클라이언트

@@ -65,7 +65,7 @@ public class TeamService {
 
         //팀 캘린더 생성 요청 (Feign Client 호출)
         TeamCalendarRequestDto requestDto = new TeamCalendarRequestDto(team.getTeamId());
-        calendarServiceClient.createTeamCalendar(requestDto);
+        calendarServiceClient.createTeamCalendar(requestDto);   
 
         //팀 생성자 프로필 요청 (Feign Client 호출)
         String creatorProfileImage = userServiceClient.getUserProfile(masterMember.getUserId());
