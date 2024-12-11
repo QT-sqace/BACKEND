@@ -35,7 +35,6 @@ public class ChatRoomService {
     private final ChatMessageRepository messageRepository;
     private final ChatRoomRepository roomRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper; // 생성자 주입
 
     private static final String CHATROOM_LIST_CACHE_KEY = "user:%s:chatrooms";
     private static final String UNREAD_COUNT_CACHE_KEY = "room:%d:user:%d:unread";
@@ -227,10 +226,12 @@ public class ChatRoomService {
     /**
      * 채팅방 입장
      */
-    /**
-     * 채팅방 입장
-     */
     public ChatRoomDataResponseDto enterChatRoom(Long roomId, Long userId) {
+        List<ChatParticipantDto> participants = loadParticipantsFromDB(roomId);
+
+        cacheParticipantsToRedis(roomId, participants);
+/*        //기존 코드
+
         // Redis에서 참여자 정보 조회
         List<ChatParticipantDto> participants = getParticipantsFromRedis(roomId);
 
@@ -238,7 +239,7 @@ public class ChatRoomService {
         if (participants.isEmpty()) {
             participants = loadParticipantsFromDB(roomId);
             cacheParticipantsToRedis(roomId, participants);
-        }
+        }*/
 
         // 현재 사용자 추가 (참여자 목록 갱신)
         boolean isUserInParticipants = participants.stream()
@@ -383,7 +384,8 @@ public class ChatRoomService {
                     ChatParticipantDto participant = participants.stream()
                             .filter(p -> p.getUserId().equals(message.getSenderId()))
                             .findFirst()
-                            .orElse(new ChatParticipantDto(null, "Unknown User", "/images/user/defaultImage.png"));
+                            .orElse(new ChatParticipantDto(null, "Unknown User",
+                                    "http://172.16.211.103:9000/profile/defaultImage.png"));
 
                     message.setSenderName(participant.getUserName());
                     message.setSenderProfileImage(participant.getProfileImage());
