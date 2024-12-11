@@ -33,6 +33,7 @@ public class TeamController {
         log.info("request create team {}", request);
         //토큰에서 userId 가져오기
         Long creatorUserId = jwtUtil.extractedUserIdFromHeader(token);
+        log.info("creatorUserId값 확인 {}",creatorUserId);
         teamService.createTeam(request, creatorUserId); // 사용자 ID를 서비스에 전달
         return ResponseEntity.ok(BasicResponseDto.success("팀 생성 완료", null));
     }
