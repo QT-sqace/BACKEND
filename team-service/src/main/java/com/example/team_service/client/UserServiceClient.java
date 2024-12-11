@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "user-service-client", url = "user-service.spring-boot-app.svc.cluster.local:8084", configuration = FeignClientConfig.class)
+@FeignClient(name = "user-service-client", url = "user-service.spring-boot-app.svc.cluster.local:8080", configuration = FeignClientConfig.class)
 public interface UserServiceClient {
     //유저서비스를 통해서 유저 정보 가져옴(닉네임)
     @GetMapping("/basic/{user_id}")
