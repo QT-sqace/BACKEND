@@ -5,9 +5,9 @@ node {
         dir('gateway') {
             load 'Jenkinsfile'
         }
-    } else if (branchName == 'team-service') {
+    } else if (branchName == 'jira-auth-service') {
         checkout scm
-        dir('team-service') {
+        dir('jira-link') {
             load 'Jenkinsfile'
         }
     } else {
