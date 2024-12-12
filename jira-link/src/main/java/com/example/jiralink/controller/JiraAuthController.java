@@ -55,7 +55,7 @@ public class JiraAuthController {
                 "&state=" + state +  // 무작위 상태 값
                 "&response_type=code" +
                 "&prompt=none"; //로그인 상태 유지
-
+        log.info("Redirecting to Jira auth URL: {}", authUrl);
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", authUrl).build();
     }
 
