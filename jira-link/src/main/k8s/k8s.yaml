@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: jira-auth
-          image: hajewoong/qt-sqace-backend-jira-auth:latest
+          image: hajewoong/qt-sqace-backend-jira-auth-service:latest
           ports:
             - containerPort: 8085
           env:
