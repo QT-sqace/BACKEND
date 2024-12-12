@@ -46,9 +46,6 @@ kind: Ingress
 metadata:
   name: jira-auth-ingress
   namespace: spring-boot-app
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
