@@ -2,6 +2,7 @@ package com.example.team_service.client;
 
 import com.example.team_service.config.FeignClientConfig;
 import com.example.team_service.dto.external.BasicInfoDto;
+import com.example.team_service.dto.external.UserDetailResponseDto;
 import com.example.team_service.dto.external.UserInfoDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,4 +21,7 @@ public interface UserServiceClient {
     //팀 마이페이지에서 회원정보 가져오기 - 이름, 컨텍이메일, 폰번호, 프로필
     @GetMapping("/userInfo/{userId}")
     UserInfoDto getUserInfo(@PathVariable("userId") Long userId);
+
+    @GetMapping("/userDetailInfo/{userId}")
+    UserDetailResponseDto getUserDetail(@PathVariable("userId") Long userId);
 }

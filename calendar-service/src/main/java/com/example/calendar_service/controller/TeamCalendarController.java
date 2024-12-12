@@ -38,6 +38,13 @@ public class TeamCalendarController {
         return ResponseEntity.ok(BasicResponseDto.success("팀 일정 동기화 완료", null));
     }
 
+    //팀 메인화면 캘린더 정보 반환 - feign
+    @GetMapping("/team/calendar/{teamId}")
+    public ResponseEntity<List<TeamEventResponseDto>> getTeamCalendar(@PathVariable("teamId") Long teamId) {
+        List<TeamEventResponseDto> events = calendarService.getTeamEvents(teamId);
+        return ResponseEntity.ok(events);
+    }
+
     //팀 일정 조회
     @GetMapping("/team/events/{teamId}")
     public ResponseEntity<BasicResponseDto> getTeamEvent(@PathVariable Long teamId,
