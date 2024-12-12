@@ -5,12 +5,14 @@ import com.example.jiralink.service.JiraAuthService;
 import com.example.jiralink.util.JwtUtil;
 import com.example.jiralink.util.ScopeManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/jira/auth")
@@ -41,7 +43,7 @@ public class JiraAuthController {
             // 테스트용 userId (브라우저에서 헤더가 없는 경우)
             userId = 1L; // 임시 userId
         }
-
+        log.info("auth jira: {}", userId);
         String scopes = scopeManager.getScopeString();
         String state = userId + ":" + UUID.randomUUID();
 
