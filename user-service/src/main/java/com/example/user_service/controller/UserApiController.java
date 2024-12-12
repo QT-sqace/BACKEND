@@ -1,6 +1,7 @@
 package com.example.user_service.controller;
 
 import com.example.user_service.dto.external.BasicInfoDto;
+import com.example.user_service.dto.external.UserDetailResponseDto;
 import com.example.user_service.dto.external.UserInfoDto;
 import com.example.user_service.entity.User;
 import com.example.user_service.entity.UserInfo;
@@ -66,5 +67,17 @@ public class UserApiController {
                 userInfo.getProfileImage() != null ? userInfo.getProfileImage() : "기본프로필 경로 반환 예정"
         );
         return ResponseEntity.ok(userInfoDto);
+    }
+
+    @GetMapping("/userDetailInfo/{userId}")
+    public ResponseEntity<UserDetailResponseDto> getUserDetailInfo(@PathVariable("userId") Long userId) {
+        UserInfo userInfo = userInfoRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
+
+        UserDetailResponseDto responseDto = new UserDetailResponseDto(
+                userInfo.getUserName(),
+                userInfo.getProfileImage()
+        );
+        return ResponseEntity.ok(responseDto);
     }
 }

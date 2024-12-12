@@ -8,4 +8,6 @@ import java.util.List;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     // 특정 작성자(TeamMember) ID로 공지사항 조회
     List<Notice> findByCreatedByTeamMemberId(Long teamMemberId);
+
+    List<Notice> findAllByOrderByCreatedDateDesc();
 }
