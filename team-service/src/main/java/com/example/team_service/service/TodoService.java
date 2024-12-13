@@ -28,7 +28,7 @@ public class TodoService {
         return todoRepository.findAllByTeam_TeamIdAndUserId(teamId, userId);
     }
 
-    public Todo createTodo(Long teamId, String authorizationHeader, String description) {
+    public Todo createTodo(Long teamId, String authorizationHeader, String title, String description) {
         Long userId = jwtUtil.extractedUserIdFromHeader(authorizationHeader);
 
         // 유저 정보 조회
@@ -45,7 +45,7 @@ public class TodoService {
                 .orElseThrow(() -> new RuntimeException("Team not found"));
 
         // todo 생성
-        Todo todo = new Todo(null, description, false, todoInfo.getUserId(), todoInfo.getName(), team);
+        Todo todo = new Todo(null, title, description, false, userId, basicInfo.getUserName(), team);
 
         // 저장
         return todoRepository.save(todo);
