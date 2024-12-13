@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class TodoDTO {
+    private String title;
     private String description;
 }

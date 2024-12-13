@@ -38,7 +38,7 @@ public class TodoController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TodoDTO request) {
 
-        return ResponseEntity.ok(todoService.createTodo(teamId, authorizationHeader, request.getDescription()));
+        return ResponseEntity.ok(todoService.createTodo(teamId, authorizationHeader, request.getTitle(), request.getDescription()));
     }
 
     // 할 일 상태 업데이트
