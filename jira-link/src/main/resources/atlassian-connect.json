@@ -1,0 +1,54 @@
+{
+  "key": "jira-project-tool",
+  "name": "Sqace",
+  "description": "Jira 연동을 위한 서비스입니다.",
+  "baseUrl": "http://172.16.211.23/api",
+  "vendor": {
+    "name": "QT",
+    "url": "http://172.16.211.23/api"
+  },
+  "authentication": {
+    "type": "jwt"
+  },
+  "scopes": [
+    "read:jira-user",
+    "read:jira-work",
+    "write:jira-work",
+    "read:issue:jira",
+    "write:issue:jira",
+    "read:board-scope:jira-software",
+    "read:sprint:jira-software"
+  ],
+  "modules": {
+    "jira:issueTabPanel": [
+      {
+        "key": "linked-issues-tab",
+        "name": {
+          "value": "Linked Issues"
+        },
+        "url": "/jira/issues-tab",
+        "weight": 100
+      }
+    ],
+    "jira:generalPage": [
+      {
+        "key": "general-page",
+        "name": {
+          "value": "General Page"
+        },
+        "url": "/jira/general",
+        "conditions": []
+      }
+    ]
+  },
+  "lifecycle": {
+    "installed": "/jira/lifecycle/installed",
+    "uninstalled": "/jira/lifecycle/uninstalled",
+    "enabled": "/jira/lifecycle/enabled",
+    "disabled": "/jira/lifecycle/disabled"
+  },
+  "apiVersion": 1,
+  "apiMigrations": {
+    "gdpr": true
+  }
+}
