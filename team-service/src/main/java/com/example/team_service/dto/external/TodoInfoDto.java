@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TodoInfoDto {
     private long userId;
-    private String name; // 유저 이름
+    private String name;
 }
