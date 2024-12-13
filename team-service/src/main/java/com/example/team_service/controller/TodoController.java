@@ -38,13 +38,22 @@ public class TodoController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TodoDTO request) {
 
-        return ResponseEntity.ok(todoService.createTodo(teamId, authorizationHeader, request.getDescription()));
+        return ResponseEntity.ok(todoService.createTodo(teamId, authorizationHeader, request.getTitle(), request.getDescription()));
     }
 
     // 할 일 상태 업데이트
-    @PutMapping("/{todoId}")
+    @PutMapping("/{todoId}/status")
     public ResponseEntity<Todo> updateTodo(@PathVariable Long todoId, @RequestParam Boolean completed) {
         return ResponseEntity.ok(todoService.updateTodoStatus(todoId, completed));
+    }
+
+    // 할 일 수정
+    @PutMapping("/{todoId}/update")
+    public ResponseEntity<Todo> updateTodo(
+            @PathVariable Long todoId,
+            @RequestBody TodoDTO request) {
+        Todo updatedTodo = todoService.updateTodo(todoId, request.getTitle(), request.getDescription());
+        return ResponseEntity.ok(updatedTodo);
     }
 
     // 할 일 삭제
