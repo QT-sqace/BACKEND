@@ -29,7 +29,7 @@ spring:
         corsConfigurations:
           '[/**]': # 모든 경로에 대해 CORS 설정 적용
             allowedOrigins:
-              - "http://172.16.211.23"
+              - "https://172.16.211.23"
             allowedMethods:
               - "*"
             allowedHeaders:
