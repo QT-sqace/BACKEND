@@ -5,8 +5,10 @@ import com.example.team_service.entity.Todo;
 import com.example.team_service.service.TodoService;
 import com.example.team_service.util.JwtUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -19,16 +21,29 @@ public class TodoController {
     private final TodoService todoService;
     private final JwtUtil jwtUtil;
 
-    // 팀 ID와 사용자 ID로 할 일 조회
-    @GetMapping("/team")
-    public ResponseEntity<List<Todo>> getTodosForTeam(@RequestParam Long teamId, @RequestParam Long userId) {
-        return ResponseEntity.ok(todoService.getTodosForTeam(teamId, userId));
+    // 팀 ID와 유저 ID로 할 일 조회
+    @GetMapping("/team/{teamId}/user")
+    public ResponseEntity<List<TodoDTO>> getTodosForTeam(
+            @PathVariable Long teamId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            Long userId = jwtUtil.extractedUserIdFromHeader(authorizationHeader);
+            List<TodoDTO> todos = todoService.getTodosForTeam(teamId, userId);
+            return ResponseEntity.ok(todos);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch todos", e);
+        }
     }
 
     // 팀 ID로 할 일 조회
-    @GetMapping
-    public ResponseEntity<List<Todo>> getTodosByTeamId(@RequestParam Long teamId) {
-        return ResponseEntity.ok(todoService.getTodosByTeamId(teamId));
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<List<TodoDTO>> getTodosByTeamId(@PathVariable Long teamId) {
+        try {
+            List<TodoDTO> todos = todoService.getTodosByTeamId(teamId);
+            return ResponseEntity.ok(todos);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch todos for team", e);
+        }
     }
 
     // 할 일 생성
@@ -49,11 +64,19 @@ public class TodoController {
 
     // 할 일 수정
     @PutMapping("/{todoId}/update")
-    public ResponseEntity<Todo> updateTodo(
+    public ResponseEntity<TodoDTO> updateTodo(
             @PathVariable Long todoId,
-            @RequestBody TodoDTO request) {
-        Todo updatedTodo = todoService.updateTodo(todoId, request.getTitle(), request.getDescription());
-        return ResponseEntity.ok(updatedTodo);
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody TodoDTO todoDTO) {
+        try {
+            Long userId = jwtUtil.extractedUserIdFromHeader(authorizationHeader);
+            TodoDTO updatedTodo = todoService.updateTodoIfOwner(todoId, userId, todoDTO);
+            return ResponseEntity.ok(updatedTodo);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update todo", e);
+        }
     }
 
     // 할 일 삭제

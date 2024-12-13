@@ -15,7 +15,7 @@ public class Todo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long todoId;
 
     @Column(nullable = false)
     private String title;
@@ -29,7 +29,7 @@ public class Todo {
     @Column(nullable = false)
     private Long userId; // 유저 ID 저장
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String userName; // 유저 이름 저장 (Optional)
 
     @ManyToOne
