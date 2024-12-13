@@ -151,4 +151,16 @@ public class TeamController {
 
         return ResponseEntity.ok(BasicResponseDto.success("팀원 추방이 완료되었습니다.", null));
     }
+
+    //팀내에서 본인의 권한 반환
+    @GetMapping("/teamMemberRole/{teamId}")
+    public ResponseEntity<BasicResponseDto> getTeamRole(
+            @PathVariable("teamId") Long teamId,
+            @RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+
+        String role = teamService.getTeamMemberRole(teamId, userId);
+
+        return ResponseEntity.ok(BasicResponseDto.success("팀내 본인역할 반환", role));
+    }
 }

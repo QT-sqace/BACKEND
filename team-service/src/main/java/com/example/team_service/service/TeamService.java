@@ -384,7 +384,6 @@ public class TeamService {
             log.info("추가 초대 이메일 발송 완료: {}, 초대 링크: {}", email, inviteLink);
         }
         log.info("팀 ID {}에 대한 추가 초대 완료.", teamId);
-
     }
 
     public void removeTeamMember(Long teamId, Long targetUserId, Long requestUserId) {
@@ -469,5 +468,13 @@ public class TeamService {
         responseDto.setCalendars(calendars);
 
         return responseDto;
+    }
+
+    public String getTeamMemberRole(Long teamId, Long userId) {
+
+        TeamMember teamMember = teamMemberRepository.findByTeam_TeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다."));
+
+        return teamMember.getRole().name();
     }
 }
