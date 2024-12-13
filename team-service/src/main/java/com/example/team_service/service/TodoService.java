@@ -55,6 +55,7 @@ public class TodoService {
         return todoRepository.findAllByTeam_TeamId(teamId);
     }
 
+    // 완료 상태 수정
     public Todo updateTodoStatus(Long todoId, Boolean completed) {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new RuntimeException("Todo not found"));
@@ -65,6 +66,15 @@ public class TodoService {
         }
 
         todo.setCompleted(completed);
+        return todoRepository.save(todo);
+    }
+
+    // todo 수정
+    public Todo updateTodo(Long todoId, String title, String description) {
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(() -> new RuntimeException("Todo not found"));
+        todo.setTitle(title);
+        todo.setDescription(description);
         return todoRepository.save(todo);
     }
 
