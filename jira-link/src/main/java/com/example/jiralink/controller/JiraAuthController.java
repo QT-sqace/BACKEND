@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class JiraAuthController {
 
     // Step 1: Jira 인증 페이지로 리디렉션하는 /login 엔드포인트 추가
     @GetMapping("/login")
-    public ResponseEntity<String> redirectToJiraAuth(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    public RedirectView redirectToJiraAuth(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         // JwtUtil을 사용하여 Authorization 헤더에서 userId 추출
         Long userId;
 //        try {
@@ -50,18 +51,21 @@ public class JiraAuthController {
         String authUrl = "https://auth.atlassian.com/authorize" +
                 "?audience=api.atlassian.com" +
                 "&client_id=" + jiraConfig.getClientId() +
-                "&scope=" + scopes +  // 필요한 스코프 추가
+                "&scope=" + scopes +
                 "&redirect_uri=" + jiraConfig.getRedirectUri() +
-                "&state=" + state +  // 무작위 상태 값
+                "&state=" + state +
                 "&response_type=code" +
-                "&prompt=none"; //로그인 상태 유지
+                "&prompt=none";
         log.info("Redirecting to Jira auth URL: {}", authUrl);
-        return ResponseEntity.status(HttpStatus.FOUND).header("Location", authUrl).build();
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl(authUrl);
+        return redirectView;
     }
+
 
     // Step 2: 인증 코드로 액세스 토큰을 요청하는 /callback 엔드포인트
     @GetMapping("/callback")
-    public ResponseEntity<String> handleJiraCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public RedirectView handleJiraCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             String[] stateParts = state.split(":");
             Long userId = Long.valueOf(stateParts[0]);
@@ -71,10 +75,15 @@ public class JiraAuthController {
 
             jiraAuthService.updateAccessTokenAndCloudId(userId, accessToken, cloudId);
 
-            return ResponseEntity.ok("Jira integration successful.");
+            // 인증 완료 후 리다이렉션 URL 설정
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl("/success"); // 성공 페이지 또는 클라이언트로 리다이렉션
+            return redirectView;
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to complete Jira integration: " + e.getMessage());
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl("/error?message=" + e.getMessage()); // 에러 처리 페이지로 리다이렉션
+            return redirectView;
         }
     }
 
