@@ -46,8 +46,12 @@ kind: Ingress
 metadata:
   name: jira-auth-ingress
   namespace: spring-boot-app
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"  # HTTP를 HTTPS로 리다이렉트
 spec:
   ingressClassName: nginx
+  tls:  # TLS 섹션 추가
+    - secretName: tls-secret  # 생성한 TLS Secret 이름
   rules:
     - http:
         paths:
@@ -58,5 +62,6 @@ spec:
                 name: jira-auth
                 port:
                   number: 8085
+
 
 
