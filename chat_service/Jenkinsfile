@@ -9,7 +9,7 @@ pipeline {
         stage('build docker image') {
             steps {
                 sh '''
-                cd chat-service
+                cd chat_service
                 docker build -t ${DOCKER_IMAGE}-chat-service:latest .
                 '''
             }
