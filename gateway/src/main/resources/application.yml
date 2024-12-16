@@ -24,6 +24,12 @@ spring:
             - Path=/teamservice/**
           filters:
             - RewritePath=/teamservice/(?<segment>.*), /$\{segment}
+        - id: chat-service
+          uri: http://chat-service.spring-boot-app.svc.cluster.local:8081
+          predicates:
+            - Path=/chatservice/**
+          filters:
+            - RewritePath=/chatservice/(?<segment>.*), /$\{segment}
       # Global CORS 설정
       globalcors:
         corsConfigurations:
