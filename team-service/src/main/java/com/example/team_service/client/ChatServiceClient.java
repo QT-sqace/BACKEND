@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "chat-service-client", url = "http://calendar-service.spring-boot-app.svc.cluster.local:8000/chatservice")
+@FeignClient(name = "chat-service-client", url = "http://calendar-service.spring-boot-app.svc.cluster.local:8083/chatservice")
 public interface ChatServiceClient {
     //팀 생성 시점에 채팅방 생성 요청하기
     @PostMapping("/create/room")
