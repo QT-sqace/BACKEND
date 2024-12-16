@@ -1,7 +1,9 @@
 package com.example.team_service.client;
 
 import com.example.team_service.dto.external.TeamCalendarRequestDto;
+import com.example.team_service.dto.response.CalendarInfoDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,4 +18,7 @@ public interface CalendarServiceClient {
     //팀 일정 동기화 요청
     @PostMapping("/sync/{teamId}/{userId}")
     void syncTeamEventsToPersonalCalendar(@PathVariable("teamId") Long teamId, @PathVariable("userId") Long userId);
+
+    @GetMapping("/team/calendar/{teamId}")
+    List<CalendarInfoDto> getTeamEvents(@PathVariable("teamId") Long teamId);
 }

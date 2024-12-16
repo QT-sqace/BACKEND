@@ -1,17 +1,14 @@
-package com.example.chat_service.dto.response;
+package com.example.team_service.dto.external;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ChatParticipantDto {
+public class UserDetailResponseDto {
 
-    private Long userId;
     private String userName;
     private String profileImage;
 }

@@ -6,6 +6,7 @@ import com.example.team_service.dto.request.TeamCreateRequestDto;
 import com.example.team_service.dto.request.MemberRemoveRequestDto;
 import com.example.team_service.dto.request.ValidTokenRequestDto;
 import com.example.team_service.dto.response.TeamListResponseDto;
+import com.example.team_service.dto.response.TeamMainPageResponseDto;
 import com.example.team_service.dto.response.TeamManagementResponseDto;
 import com.example.team_service.service.TeamService;
 import com.example.team_service.util.JwtUtil;
@@ -28,7 +29,7 @@ public class TeamController {
 
     //팀 생성 요청
     @PostMapping("/create")
-    public ResponseEntity<BasicResponseDto> createTeam(@RequestBody TeamCreateRequestDto request,
+    public ResponseEntity<BasicResponseDto> createTeam(@ModelAttribute TeamCreateRequestDto request,
                                                        @RequestHeader("Authorization") String token) {
         log.info("request create team {}", request);
         //토큰에서 userId 가져오기
@@ -76,6 +77,18 @@ public class TeamController {
         List<TeamListResponseDto> teams = teamService.getTeamsByUserId(userId);
 
         return ResponseEntity.ok(BasicResponseDto.success("팀 목록 조회 성공", teams));
+    }
+
+    //팀 메인페이지 정보 반환
+    @GetMapping("/main/{teamId}")
+    public ResponseEntity<BasicResponseDto<TeamMainPageResponseDto>> getMainPage(
+            @PathVariable("teamId") Long teamId,
+            @RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+
+        TeamMainPageResponseDto responseDto = teamService.getMainPage(teamId, userId);
+
+        return ResponseEntity.ok(BasicResponseDto.success("팀 메인 조회 성공", responseDto));
     }
 
     //팀 마이페이지 - 정보 반환
@@ -139,5 +152,17 @@ public class TeamController {
         teamService.removeTeamMember(requestDto.getTeamId(), requestDto.getUserId(), requestUserId);
 
         return ResponseEntity.ok(BasicResponseDto.success("팀원 추방이 완료되었습니다.", null));
+    }
+
+    //팀내에서 본인의 권한 반환
+    @GetMapping("/teamMemberRole/{teamId}")
+    public ResponseEntity<BasicResponseDto> getTeamRole(
+            @PathVariable("teamId") Long teamId,
+            @RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractedUserIdFromHeader(token);
+
+        String role = teamService.getTeamMemberRole(teamId, userId);
+
+        return ResponseEntity.ok(BasicResponseDto.success("팀내 본인역할 반환", role));
     }
 }

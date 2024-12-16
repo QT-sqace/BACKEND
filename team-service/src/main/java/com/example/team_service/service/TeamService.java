@@ -3,23 +3,29 @@ package com.example.team_service.service;
 import com.example.team_service.client.CalendarServiceClient;
 import com.example.team_service.client.ChatServiceClient;
 import com.example.team_service.client.UserServiceClient;
+import com.example.team_service.common.UserStatusManager;
 import com.example.team_service.dto.external.*;
 import com.example.team_service.dto.request.TeamCreateRequestDto;
-import com.example.team_service.dto.response.ManagementInfoDto;
-import com.example.team_service.dto.response.TeamListResponseDto;
-import com.example.team_service.dto.response.TeamManagementResponseDto;
+import com.example.team_service.dto.response.*;
+import com.example.team_service.entity.Notice;
 import com.example.team_service.entity.Team;
 import com.example.team_service.entity.TeamInvite;
 import com.example.team_service.entity.TeamMember;
+import com.example.team_service.repository.NoticeRepository;
 import com.example.team_service.repository.TeamInviteRepository;
 import com.example.team_service.repository.TeamMemberRepository;
 import com.example.team_service.repository.TeamRepository;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,17 +46,57 @@ public class TeamService {
     private final UserServiceClient userServiceClient;
     private final ChatServiceClient chatServiceClient;
     private final ExecutorService executorService;  //비동기 처리용
+    private final MinioClient minioClient;
+    private final UserStatusManager userStatusManager;
+    private final NoticeRepository noticeRepository;
 
+
+    @Value("${minio.bucket.user-profile}")
+    private String profileBucket;
+
+    @Value("${minio.server.url}")
+    private String minioUrl;
 
     // 팀 생성, 추후에 팀 로고 이미지를 MinIo 경로로 등록하는 로직 필요
+    @Transactional
     public void createTeam(TeamCreateRequestDto request, Long creatorUserId) {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
+        //팀 프로필사진 등록
+        String imageUrl = null;
+        if (request.getProjectImage() != null && !request.getProjectImage().isEmpty()) {
+            log.info("팀 프로필 로직 시작---- vpn 확인하세요");
+
+            try {
+                //파일명 생성
+                String originalFileName = request.getProjectImage().getOriginalFilename();
+                String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_"); // 한글, 특수문자 제거
+                String fileName = "teams/profile" + System.currentTimeMillis() + "_" + sanitizedFileName;
+
+                // MinIO에 파일 업로드
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(profileBucket) // 팀 프로필용 버킷
+                                .object(fileName)
+                                .stream(request.getProjectImage().getInputStream(), request.getProjectImage().getSize(), -1)
+                                .contentType(request.getProjectImage().getContentType())
+                                .build()
+                );
+
+                imageUrl = minioUrl + "/" + profileBucket + "/" + fileName;
+                log.info("팀 프로필 이미지 경로 확인: {}", imageUrl);
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e.getMessage() + "문제가 발생했습니다.");
+            }
+
+        }
+
+
         Team team = new Team(
                 request.getProjectName(),
                 encodedPassword,
-                request.getProjectImage()
+                imageUrl
         );
         teamRepository.save(team);
 
@@ -79,7 +125,7 @@ public class TeamService {
         chatServiceClient.createRoom(teamChatRequestDto);
 
 
-        //초대 링크 발송
+        //초대 링크 발송 - 여기 폼데이터일떄 기준으로 수정하기
         for (String email : request.getEmails()) {
             String inviteToken = UUID.randomUUID().toString();
             TeamInvite invite = new TeamInvite(inviteToken, team);
@@ -338,7 +384,6 @@ public class TeamService {
             log.info("추가 초대 이메일 발송 완료: {}, 초대 링크: {}", email, inviteLink);
         }
         log.info("팀 ID {}에 대한 추가 초대 완료.", teamId);
-
     }
 
     public void removeTeamMember(Long teamId, Long targetUserId, Long requestUserId) {
@@ -366,5 +411,70 @@ public class TeamService {
         chatServiceClient.deleteParticipant(requestDto);
 
         log.info("팀원 추방완료 - teamId: {}, targetUserId: {}", teamId, targetUserId);
+    }
+
+    //팀 메인페이지 정보 반환
+    public TeamMainPageResponseDto getMainPage(Long teamId, Long userId) {
+
+        //팀원 접속 상태
+        List<TeamMember> teamMembers = teamMemberRepository.findByTeam_TeamId(teamId)
+                .stream()
+                .filter(member -> !member.getUserId().equals(userId))
+                .collect(Collectors.toList());
+
+
+        List<MemberInfoDto> members = teamMembers.stream()
+                .map(member -> {
+                    //Feign호출
+                    UserDetailResponseDto userDetail = userServiceClient.getUserDetail(member.getUserId());
+                    String userName = userDetail.getUserName();
+                    String profileImage = userDetail.getProfileImage();
+
+                    String userStatus = userStatusManager.getStatus(member.getUserId());
+
+                    return new MemberInfoDto(member.getUserId(), userName, profileImage, userStatus);
+                })
+                .collect(Collectors.toList());
+
+        //notice
+        List<Notice> noticeEntity = noticeRepository.findAllByOrderByCreatedDateDesc();
+
+        List<NoticeInfoDto> notices = noticeEntity.stream()
+                .map(notice -> {
+                    NoticeInfoDto dto = new NoticeInfoDto();
+                    dto.setNoticeId(notice.getNoticeId());
+                    dto.setNoticeTitle(notice.getTitle());
+                    dto.setUserName(notice.getUserName());
+                    dto.setCreatedDate(notice.getCreatedDate());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        //캘린더
+        List<CalendarInfoDto> calendars;
+        try {
+            calendars = calendarServiceClient.getTeamEvents(teamId);
+            log.info("캘린더 페인 호출");
+        } catch (Exception e) {
+            // 캘린더 데이터가 없을 경우 빈 리스트로 초기화
+            log.warn("캘린더 데이터를 가져오는 중 문제가 발생했습니다. teamId: {}, error: {}", teamId, e.getMessage());
+            calendars = new ArrayList<>();
+        }
+
+        //ResponseDto 생성
+        TeamMainPageResponseDto responseDto = new TeamMainPageResponseDto();
+        responseDto.setMembers(members);
+        responseDto.setNotices(notices);
+        responseDto.setCalendars(calendars);
+
+        return responseDto;
+    }
+
+    public String getTeamMemberRole(Long teamId, Long userId) {
+
+        TeamMember teamMember = teamMemberRepository.findByTeam_TeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다."));
+
+        return teamMember.getRole().name();
     }
 }

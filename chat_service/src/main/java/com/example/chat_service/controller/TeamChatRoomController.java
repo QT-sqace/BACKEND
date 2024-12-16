@@ -1,9 +1,6 @@
 package com.example.chat_service.controller;
 
-import com.example.chat_service.dto.external.ChatParticipantAddRequestDto;
-import com.example.chat_service.dto.external.ChatParticipantDeleteRequestDto;
-import com.example.chat_service.dto.external.TeamChatRequestDto;
-import com.example.chat_service.dto.external.UpdateTeamNameRequestDto;
+import com.example.chat_service.dto.external.*;
 import com.example.chat_service.dto.request.ChatMessageDto;
 import com.example.chat_service.dto.response.ChatRoomDataResponseDto;
 import com.example.chat_service.dto.response.ChatRoomDto;
@@ -58,6 +55,12 @@ public class TeamChatRoomController {
         chatService.updateTeamName(requestDto);
 
         return ResponseEntity.ok("팀 채팅방 이름변경 성공");
+    }
+
+    @PutMapping("/updateProfile")
+    public ResponseEntity<String> updateProfile(@RequestBody UpdateUserProfileDto requestDto) {
+        chatService.updateUserName(requestDto);
+        return ResponseEntity.ok("회원 프로필 업데이트 완료");
     }
 
     //팀 채팅방 리스트 조회

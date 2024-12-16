@@ -1,4 +1,4 @@
-package com.example.chat_service.dto.response;
+package com.example.user_service.dto.external;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,11 +7,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ChatParticipantDto {
+@AllArgsConstructor
+public class UserDetailResponseDto {
+    //팀 메인페이지 활용
 
-    private Long userId;
     private String userName;
     private String profileImage;
 }
