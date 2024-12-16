@@ -5,9 +5,9 @@ node {
         dir('gateway') {
             load 'Jenkinsfile'
         }
-    } else if (branchName == 'team-service') {
+    } else if (branchName == 'user-service') {
         checkout scm
-        dir('team-service') {
+        dir('user-service') {
             load 'Jenkinsfile'
         }
     } else {
