@@ -25,7 +25,7 @@ pipeline {
         stage('deploy') {
             steps {
                 sh 'kubectl apply -f team-service/src/main/k8s/k8s.yaml'
-                sh 'kubectl rollout restart deployment/team-service -n spring-boot-app '
+                sh 'kubectl rollout restart deploy -n spring-boot-app '
             }
         }
     }
