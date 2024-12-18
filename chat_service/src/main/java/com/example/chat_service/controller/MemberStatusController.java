@@ -24,8 +24,8 @@ public class MemberStatusController {
     public ResponseEntity<List<TeamInfoDto>> getTeamMembersStatus(
             @RequestHeader("Authorization") String token) {
         Long userId = jwtUtil.extractedUserIdFromHeader(token);
+        log.info("/members/status 요청 - userId: {}", userId);
         List<TeamInfoDto> teamInfos =  memberStatusService.getUserStatusByUserId(userId);
-
         return ResponseEntity.ok(teamInfos);
     }
 }
