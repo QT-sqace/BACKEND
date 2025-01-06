@@ -16,6 +16,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,12 +84,22 @@ public class TeamCalendarService {
             throw new IllegalArgumentException("해당 팀 캘린더가 존재하지 않습니다.");
         }
 
+        LocalDateTime startDateKST = ZonedDateTime.parse(requestDto.getStartDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+        LocalDateTime endDateKST = ZonedDateTime.parse(requestDto.getEndDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
         CalendarInfo teamEvent = new CalendarInfo(
                 teamCalendar,
                 requestDto.getTitle(),
                 requestDto.getContent(),
-                requestDto.getStartDate(),
-                requestDto.getEndDate(),
+                startDateKST.toString(),
+                endDateKST.toString(),
+//                requestDto.getStartDate(),
+//                requestDto.getEndDate(),
                 requestDto.getAllDay(),
                 requestDto.getColor(),
                 CalendarInfo.EventType.TEAM
@@ -125,12 +138,22 @@ public class TeamCalendarService {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
+        LocalDateTime startDateKST = ZonedDateTime.parse(requestDto.getStartDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+        LocalDateTime endDateKST = ZonedDateTime.parse(requestDto.getEndDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
         //수정 로직
         teamEvent.updateEvent(
                 requestDto.getTitle(),
                 requestDto.getContent(),
-                requestDto.getStartDate(),
-                requestDto.getEndDate(),
+                startDateKST.toString(),
+                endDateKST.toString(),
+//                requestDto.getStartDate(),
+//                requestDto.getEndDate(),
                 requestDto.getAllDay(),
                 requestDto.getColor()
         );

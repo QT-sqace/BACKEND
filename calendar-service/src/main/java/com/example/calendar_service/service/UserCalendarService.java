@@ -11,6 +11,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,8 +36,26 @@ public class UserCalendarService {
     //개인 일정 등록
     public void createEvent(Long userId, UserEventRequestDto dto) {
         Calendar calendar = calendarRepository.findByUserId(userId);
-        CalendarInfo event = new CalendarInfo(calendar, dto.getTitle(), dto.getContent(),
-                dto.getStartDate(), dto.getEndDate(), dto.getAllDay(),dto.getColor(),
+
+        LocalDateTime startDateKST = ZonedDateTime.parse(dto.getStartDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+        LocalDateTime endDateKST = ZonedDateTime.parse(dto.getEndDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+
+        CalendarInfo event = new CalendarInfo(
+                calendar,
+                dto.getTitle(),
+                dto.getContent(),
+                startDateKST.toString(),
+                endDateKST.toString(),
+//                dto.getStartDate(),
+//                dto.getEndDate(),
+                dto.getAllDay(),
+                dto.getColor(),
                 CalendarInfo.EventType.PERSONAL);
 
         calendarInfoRepository.save(event);
@@ -100,9 +121,25 @@ public class UserCalendarService {
             throw new IllegalStateException("본인의 일정만 수정할 수 있습니다");
         }
 
+
+        LocalDateTime startDateKST = ZonedDateTime.parse(requestDto.getStartDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+        LocalDateTime endDateKST = ZonedDateTime.parse(requestDto.getStartDate())
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
+
+
         //수정 가능한 필드 업데이트
-        event.updateEvent(requestDto.getTitle(), requestDto.getContent(), requestDto.getStartDate(),
-                requestDto.getEndDate(), requestDto.getAllDay(), requestDto.getColor());
+        event.updateEvent(requestDto.getTitle(),
+                requestDto.getContent(),
+                startDateKST.toString(),
+                endDateKST.toString(),
+//                requestDto.getStartDate(),
+//                requestDto.getEndDate(),
+                requestDto.getAllDay(),
+                requestDto.getColor());
 
         calendarInfoRepository.save(event);
     }
